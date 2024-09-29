@@ -1,6 +1,4 @@
-Here is the README.md file in markdown format for the given code:
-
-**ATS Keyword Scanner App**
+**ResuScanner.AI**
 ==========================
 
 **Overview**
