@@ -1,36 +1,69 @@
-**ResuScanner.AI**
-==========================
+# Welcome to your Lovable project
 
-**Overview**
------------
+## Project info
 
-This app is a keyword scanner for ATS (Applicant Tracking System) resumes. It uses the Google Generative AI model to generate keywords for a given job role and level, and then compares them with the keywords extracted from a uploaded PDF resume.
+**URL**: https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104
 
-**Files**
---------
+## How can I edit this code?
 
-### app.py
+There are several ways of editing your application.
 
-This is the main application file. It imports the necessary libraries, sets up the Streamlit app, and defines the functions for extracting keywords from the uploaded PDF file and generating keywords for the job role and level using the Google Generative AI model.
+**Use Lovable**
 
-### requirements.txt
+Simply visit the [Lovable Project](https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104) and start prompting.
 
-This file lists the dependencies required to run the app. It includes the following packages:
+Changes made via Lovable will be committed automatically to this repo.
 
-* langchain_google_genai==1.0.6
-* numpy==1.25.2
-* pypdf==4.2.0
-* streamlit==1.35.0
+**Use your preferred IDE**
 
-**How to Use**
---------------
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-1. Upload a PDF resume file using the file uploader.
-2. Enter the job role and select the level (Internship or Entry Level) using the text input and selectbox.
-3. Click the "Submit" button to start the keyword scanning process.
-4. The app will display the ATS score based on the keyword analysis, as well as suggestions for missing keywords.
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-**Note**
------
+Follow these steps:
 
-This app uses the Google Generative AI model to generate keywords, which may require a Google API key to function properly.
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with .
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
