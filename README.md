@@ -12,7 +12,7 @@ A modern ATS (Applicant Tracking System) resume scanner built with Next.js and T
 
 ## Demo
 
-[Live Demo](#) (Replace with actual link if deployed)
+https://resuscanner.netlify.app/
 
 ## Installation
 
