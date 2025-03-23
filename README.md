@@ -1,6 +1,6 @@
 # ResuScanner.AI
 
-A modern ATS (Applicant Tracking System) resume scanner built with Next.js and Tailwind CSS. Upload a PDF resume, specify a job role and level, and get an ATS score with keyword suggestions—all wrapped in a cosmic-themed UI featuring a starry background and floating animations.
+A modern ATS (Applicant Tracking System) resume scanner built with Next.js and Tailwind CSS. Upload a PDF resume, specify a job role and level, and get an ATS score with keyword suggestions.
 
 ## Features
 
@@ -20,7 +20,7 @@ A modern ATS (Applicant Tracking System) resume scanner built with Next.js and T
 
 ```bash
 git clone https://github.com/priyansupattanaik/resuscanner.ai.git
-cd ats-scanner
+cd resuscanner.ai
 ```
 
 ### Install Dependencies
