@@ -1,69 +1,52 @@
-# Welcome to your Lovable project
+# ResuScanner.AI
 
-## Project info
+A modern ATS (Applicant Tracking System) resume scanner built with Next.js and Tailwind CSS. Upload a PDF resume, specify a job role and level, and get an ATS score with keyword suggestions—all wrapped in a cosmic-themed UI featuring a starry background and floating animations.
 
-**URL**: https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104
+## Features
 
-## How can I edit this code?
+- Upload PDF resumes for keyword analysis.
+- Input job role and level (Internship/Entry Level) to generate relevant keywords.
+- Displays ATS score (out of 100) and missing keyword suggestions.
+- Cosmic design with starry background, floating animations, and a grid overlay.
+- Mobile-responsive and powered by Google Generative AI (Gemini-Pro).
 
-There are several ways of editing your application.
+## Demo
 
-**Use Lovable**
+[Live Demo](#) (Replace with actual link if deployed)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104) and start prompting.
+## Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+### Clone the Repo
 
-**Use your preferred IDE**
+```bash
+git clone https://github.com/priyansupattanaik/resuscanner.ai.git
+cd ats-scanner
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Install Dependencies
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+npm install
+```
 
-Follow these steps:
+### Set Up Environment
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Add your Google API key to `.env.local`:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```text
+GOOGLE_API_KEY="your-google-api-key"
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Run Locally
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Visit [http://localhost:3000](http://localhost:3000).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Usage
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c000a46e-7d74-4651-86f4-02182811a104) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. Upload a PDF resume.
+2. Enter a job role (e.g., "Software Engineer") and select a level.
+3. Click "Submit" to see your ATS score and keyword suggestions.
