@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import DebugOverlay from "@/components/DebugOverlay"; // New Debug Component
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -15,7 +14,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <DebugOverlay /> {/* Added Global Debug Overlay */}
+      {/* DebugOverlay removed for cleaner production UI */}
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

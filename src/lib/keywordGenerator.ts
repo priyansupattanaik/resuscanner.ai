@@ -1,5 +1,4 @@
 import { config } from "@/data/config";
-import { debugService } from "./debug";
 
 export interface AIAnalysisResult {
   score: number;
@@ -13,8 +12,6 @@ export async function generateResumeAnalysis(
   jobLevel: string
 ): Promise<AIAnalysisResult> {
   try {
-    debugService.log("info", "Starting Llama 3.2 Analysis", { role: jobRole });
-
     // 1. Strict System Instruction
     const systemInstruction = `You are a strict JSON Data Extraction Engine.
     RULES:
@@ -52,31 +49,27 @@ export async function generateResumeAnalysis(
           { role: "user", content: userPrompt },
         ],
         temperature: 0.1, // Near zero for consistency
-        max_tokens: 2000, // INCREASED to prevent truncation
+        max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      debugService.log("error", `API Error ${response.status}`, err);
+      console.error(`API Error ${response.status}`, err);
       throw new Error(`API Failed: ${response.status}`);
     }
 
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content || "";
 
-    debugService.log("success", "Raw AI Response", {
-      length: rawContent.length,
-    });
-
     return parseAIResponse(rawContent);
   } catch (error) {
-    debugService.log("error", "Analysis Failed", error);
+    console.error("Analysis Failed", error);
     return {
       score: 0,
       missingKeywords: ["Error: Could not analyze"],
       summary:
-        "We could not connect to the Llama AI model. Please check your internet or API Key.",
+        "We could not connect to the AI model. Please check your internet or API Key.",
     };
   }
 }
@@ -104,27 +97,18 @@ function parseAIResponse(text: string): AIAnalysisResult {
       return validateAndReturn(JSON.parse(clean));
     } catch (e) {
       // 4. If parse failed, try to REPAIR the JSON
-      // The error you saw was missing the final '}'
       console.log("JSON Parse failed, attempting repair...");
 
-      // If it ends with a quote (like in your error), add '}'
       if (clean.trim().endsWith('"')) {
         clean += " }";
-      }
-      // If it ends with a comma (common list truncation), remove comma and add '}'
-      else if (clean.trim().endsWith(",")) {
+      } else if (clean.trim().endsWith(",")) {
         clean = clean.trim().slice(0, -1) + " }";
-      }
-      // If it ends with a closing square bracket ']', add '}'
-      else if (clean.trim().endsWith("]")) {
+      } else if (clean.trim().endsWith("]")) {
         clean += " }";
-      }
-      // Fallback: Just append '}' and hope
-      else {
+      } else {
         clean += " }";
       }
 
-      // Try parsing again after repair
       try {
         return validateAndReturn(JSON.parse(clean));
       } catch (finalError) {
@@ -132,8 +116,7 @@ function parseAIResponse(text: string): AIAnalysisResult {
       }
     }
   } catch (error) {
-    debugService.log("error", "JSON Repair Failed", { raw: text });
-    // Safe Fallback so app doesn't crash
+    console.error("JSON Repair Failed", { raw: text });
     return {
       score: 70,
       missingKeywords: ["Resume Analysis Complete"],
@@ -143,7 +126,6 @@ function parseAIResponse(text: string): AIAnalysisResult {
   }
 }
 
-// Helper to ensure the object has the right shape
 function validateAndReturn(parsed: any): AIAnalysisResult {
   return {
     score: typeof parsed.score === "number" ? parsed.score : 0,

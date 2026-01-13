@@ -1,13 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Apple-like Light Mode Base */
-    --background: 210 20% 98%; /* Soft cool white */
+    /* Pure, clean Apple-like defaults */
+    --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -16,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 212 100% 50%; /* iOS Blue */
+    --primary: 211 100% 50%; /* System Blue */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -33,9 +31,9 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 212 100% 50%;
+    --ring: 211 100% 50%;
 
-    --radius: 1rem; /* 16px for that smooth rounded look */
+    --radius: 1rem;
   }
 }
 
@@ -44,12 +42,27 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased tracking-tight;
-    font-family: "Inter", sans-serif;
+    @apply bg-background text-foreground antialiased selection:bg-blue-100 selection:text-blue-900;
+    /* Optimizes font rendering for that crisp look */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Fluid Mesh Gradients */
+/* Glassmorphism Utilities 
+  High saturation blur for that "frosted glass" effect 
+*/
+.glass-panel {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-sm;
+}
+
+.glass-card {
+  @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-lg rounded-[24px] transition-all duration-300 hover:shadow-xl hover:bg-white/80;
+}
+
+/* Refined Mesh Gradient
+  Much softer, using lighter blues and grays for a "Pro" look
+*/
 .mesh-gradient-bg {
   position: fixed;
   top: 0;
@@ -57,61 +70,20 @@
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background-color: #f3f4f6;
-  background-image: radial-gradient(
-      at 0% 0%,
-      hsla(253, 16%, 7%, 1) 0,
-      transparent 50%
-    ),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
   background: radial-gradient(
-      at 10% 10%,
-      rgba(59, 130, 246, 0.15) 0px,
+      at 0% 0%,
+      hsla(210, 100%, 98%, 1) 0,
       transparent 50%
     ),
-    radial-gradient(at 90% 10%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
-    radial-gradient(at 80% 80%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-    radial-gradient(at 10% 90%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
-  filter: blur(40px);
-  opacity: 0.8;
-  animation: bg-breathe 20s ease-in-out infinite alternate;
+    radial-gradient(at 100% 0%, hsla(220, 100%, 97%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(200, 100%, 98%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(215, 100%, 99%, 1) 0, transparent 50%);
+  filter: blur(100px);
+  opacity: 1;
 }
 
-@keyframes bg-breathe {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.1);
-  }
-}
-
-/* Glassmorphism Utilities */
-.glass {
-  @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg;
-}
-
-.glass-card {
-  @apply bg-white/70 backdrop-blur-2xl border border-white/40 shadow-xl rounded-3xl transition-all duration-300 hover:shadow-2xl hover:bg-white/80;
-}
-
-.glass-panel {
-  @apply bg-white/50 backdrop-blur-md border border-white/20;
-}
-
-/* Custom Scrollbar */
+/* Hide scrollbar for clean aesthetics */
 ::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
+  width: 0px;
   background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
 }

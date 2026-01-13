@@ -1,5 +1,4 @@
 import { config } from "@/data/config";
-import { debugService } from "./debug";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -12,8 +11,7 @@ export async function sendChatMessage(
   jobRole: string
 ): Promise<string> {
   try {
-    debugService.log("info", "Sending Llama Chat", { msgs: history.length });
-
+    // Removed debugService, using standard console for errors only
     const systemPrompt = `You are an expert Career Coach and ATS Specialist.
     User Context: Applying for "${jobRole}".
     Resume Context: "${resumeContext.slice(0, 4000)}..."
@@ -43,7 +41,7 @@ export async function sendChatMessage(
 
     if (!response.ok) {
       const err = await response.text();
-      debugService.log("error", `Chat API Error (${response.status})`, err);
+      console.error(`Chat API Error (${response.status})`, err);
       throw new Error(`Chat failed: ${response.status}`);
     }
 
@@ -56,7 +54,7 @@ export async function sendChatMessage(
 
     return content;
   } catch (error) {
-    debugService.log("error", "Chat Failed", error);
-    return "I'm having trouble connecting to Llama 3 right now. Please try again.";
+    console.error("Chat Failed", error);
+    return "I'm having trouble connecting to the AI right now. Please try again.";
   }
 }
