@@ -41,10 +41,7 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Minimal Footer */}
       <footer className="mt-auto py-8">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-400 text-xs font-medium">
-          <p>
-            © {new Date().getFullYear()} ResuScanner.AI. Powered by Apple-style
-            Design.
-          </p>
+          <p>© {new Date().getFullYear()} ResuScanner.AI</p>
         </div>
       </footer>
     </div>
