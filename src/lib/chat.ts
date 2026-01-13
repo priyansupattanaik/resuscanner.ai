@@ -1,4 +1,5 @@
 import { config } from "@/data/config";
+import { debugService } from "./debug";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -11,18 +12,23 @@ export async function sendChatMessage(
   jobRole: string
 ): Promise<string> {
   try {
-    const systemPrompt = `You are an expert ATS Resume Consultant. 
-    Context:
-    - User is applying for: ${jobRole}
-    - Resume Content: "${resumeContext.slice(
-      0,
-      3000
-    )}..." (truncated for brevity)
-    
-    Goal: Answer the user's specific questions about improving their resume. Be concise, actionable, and encouraging.
-    Format: Use simple text with bullet points if needed. Do not use complex markdown.`;
+    debugService.log("info", "Sending Llama Chat", { msgs: history.length });
 
-    const messages = [{ role: "system", content: systemPrompt }, ...history];
+    const systemPrompt = `You are an expert Career Coach and ATS Specialist.
+    User Context: Applying for "${jobRole}".
+    Resume Context: "${resumeContext.slice(0, 4000)}..."
+    
+    Directives:
+    1. Be concise, encouraging, and actionable.
+    2. Do NOT hallucinate skills the user does not have.
+    3. Keep answers under 150 words.`;
+
+    const payload = {
+      model: config.api.model,
+      messages: [{ role: "system", content: systemPrompt }, ...history],
+      temperature: 0.7,
+      max_tokens: 500,
+    };
 
     const response = await fetch(config.api.endpoint, {
       method: "POST",
@@ -32,21 +38,25 @@ export async function sendChatMessage(
         "HTTP-Referer": config.api.siteUrl,
         "X-Title": config.api.siteName,
       },
-      body: JSON.stringify({
-        model: config.api.model,
-        messages: messages,
-        temperature: 0.7,
-      }),
+      body: JSON.stringify(payload),
     });
 
-    if (!response.ok) throw new Error("Chat API failed");
+    if (!response.ok) {
+      const err = await response.text();
+      debugService.log("error", `Chat API Error (${response.status})`, err);
+      throw new Error(`Chat failed: ${response.status}`);
+    }
 
     const data = await response.json();
-    return (
-      data.choices?.[0]?.message?.content || "I couldn't generate a response."
-    );
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("Empty response");
+    }
+
+    return content;
   } catch (error) {
-    console.error("Chat Error:", error);
-    throw error;
+    debugService.log("error", "Chat Failed", error);
+    return "I'm having trouble connecting to Llama 3 right now. Please try again.";
   }
 }

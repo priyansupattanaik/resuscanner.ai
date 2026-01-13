@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,35 +6,36 @@
 
 @layer base {
   :root {
-    --background: 240 10% 4%;
-    --foreground: 213 31% 91%;
+    /* Apple-like Light Mode Base */
+    --background: 210 20% 98%; /* Soft cool white */
+    --foreground: 240 10% 3.9%;
 
-    --card: 240 7% 8%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
-    --popover: 240 7% 8%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
 
-    --primary: 252 87% 67%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 212 100% 50%; /* iOS Blue */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 260 30% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 6% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 260 30% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5% 26%;
-    --input: 240 5% 15%;
-    --ring: 258 90% 66%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 212 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 1rem; /* 16px for that smooth rounded look */
   }
 }
 
@@ -42,120 +43,75 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans overflow-x-hidden;
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-foreground antialiased tracking-tight;
+    font-family: "Inter", sans-serif;
   }
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+/* Fluid Mesh Gradients */
+.mesh-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-color: #f3f4f6;
+  background-image: radial-gradient(
+      at 0% 0%,
+      hsla(253, 16%, 7%, 1) 0,
+      transparent 50%
+    ),
+    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+  background: radial-gradient(
+      at 10% 10%,
+      rgba(59, 130, 246, 0.15) 0px,
+      transparent 50%
+    ),
+    radial-gradient(at 90% 10%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 10% 90%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+  filter: blur(40px);
+  opacity: 0.8;
+  animation: bg-breathe 20s ease-in-out infinite alternate;
+}
+
+@keyframes bg-breathe {
+  0% {
+    transform: scale(1);
   }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  @apply bg-white/60 backdrop-blur-xl border border-white/20 shadow-lg;
+}
+
+.glass-card {
+  @apply bg-white/70 backdrop-blur-2xl border border-white/40 shadow-xl rounded-3xl transition-all duration-300 hover:shadow-2xl hover:bg-white/80;
+}
+
+.glass-panel {
+  @apply bg-white/50 backdrop-blur-md border border-white/20;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-  border-radius: 3px;
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary));
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--secondary));
-}
-
-/* Glass Card Effect */
-.glass-card {
-  @apply bg-black/20 backdrop-blur-lg border border-white/10 shadow-xl;
-}
-
-/* Custom Animations */
-.animated-border {
-  --border-width: 2px;
-  position: relative;
-  border-radius: calc(var(--radius) + var(--border-width));
-}
-
-.animated-border::after {
-  position: absolute;
-  content: "";
-  top: calc(-1 * var(--border-width));
-  left: calc(-1 * var(--border-width));
-  z-index: -1;
-  width: calc(100% + var(--border-width) * 2);
-  height: calc(100% + var(--border-width) * 2);
-  background: linear-gradient(
-    60deg,
-    hsl(var(--primary)),
-    hsl(var(--secondary)),
-    hsl(var(--accent)),
-    hsl(var(--primary))
-  );
-  background-size: 300% 300%;
-  background-position: 0 50%;
-  border-radius: calc(var(--radius) + var(--border-width));
-  animation: moveGradient 4s alternate infinite;
-}
-
-@keyframes moveGradient {
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Star Animation */
-.stars {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  transition: transform 0.5s ease-out;
-  will-change: transform;
-}
-
-.star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background-color: white;
-  border-radius: 50%;
-  opacity: 0;
-  animation: twinkle var(--duration, 5s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-  transition: opacity 0.3s ease;
-}
-
-@keyframes twinkle {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  50% {
-    opacity: var(--tw-opacity, 0.7);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-}
-
-@keyframes moveGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  background: rgba(0, 0, 0, 0.2);
 }

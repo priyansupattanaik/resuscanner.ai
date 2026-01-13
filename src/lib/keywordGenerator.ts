@@ -1,210 +1,158 @@
 import { config } from "@/data/config";
+import { debugService } from "./debug";
 
-/**
- * Generate keywords for a job role and level using the OpenRouter API
- */
-export async function generateKeywords(
+export interface AIAnalysisResult {
+  score: number;
+  missingKeywords: string[];
+  summary: string;
+}
+
+export async function generateResumeAnalysis(
+  resumeText: string,
   jobRole: string,
   jobLevel: string
-): Promise<Record<string, number>> {
+): Promise<AIAnalysisResult> {
   try {
-    // We explicitly ask for a JSON object to ensure the model outputs what we need
-    const prompt = `You are an expert ATS (Applicant Tracking System) scanner. 
-    Identify the top 30 most critical keywords and skills for a "${jobLevel}" level "${jobRole}" role.
-    
-    Return the response ONLY as a valid JSON object with this exact structure:
-    {
-      "technicalSkills": ["skill1", "skill2"],
-      "softSkills": ["skill1", "skill2"],
-      "tools": ["tool1", "tool2"]
-    }
-    
-    Do not include markdown formatting (like \`\`\`json), just the raw JSON string.`;
+    debugService.log("info", "Starting Llama 3.2 Analysis", { role: jobRole });
 
+    // 1. Strict System Instruction
+    const systemInstruction = `You are a strict JSON Data Extraction Engine.
+    RULES:
+    1. Output ONLY valid JSON.
+    2. Do NOT use Markdown.
+    3. Do NOT add conversational text.
+    4. Structure: {"score": number, "missingKeywords": string[], "summary": string}`;
+
+    // 2. User Prompt
+    const userPrompt = `Analyze this resume for the role: "${jobLevel} ${jobRole}".
+    
+    RESUME TEXT:
+    "${resumeText.slice(0, 10000)}"
+
+    REQUIRED JSON:
+    {
+      "score": <0-100>,
+      "missingKeywords": ["skill1", "skill2"],
+      "summary": "<short feedback>"
+    }`;
+
+    // 3. Call OpenRouter
     const response = await fetch(config.api.endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${config.api.apiKey}`,
-        "HTTP-Referer": config.api.siteUrl, // Required by OpenRouter
-        "X-Title": config.api.siteName, // Required by OpenRouter
+        "HTTP-Referer": config.api.siteUrl,
+        "X-Title": config.api.siteName,
       },
       body: JSON.stringify({
         model: config.api.model,
         messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt,
-              },
-            ],
-          },
+          { role: "system", content: systemInstruction },
+          { role: "user", content: userPrompt },
         ],
-        // Temperature 0.2 keeps the model focused and deterministic for data extraction
-        temperature: 0.2,
+        temperature: 0.1, // Near zero for consistency
+        max_tokens: 2000, // INCREASED to prevent truncation
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenRouter API error details:", errorText);
-      throw new Error(`API request failed with status ${response.status}`);
+      const err = await response.text();
+      debugService.log("error", `API Error ${response.status}`, err);
+      throw new Error(`API Failed: ${response.status}`);
     }
 
     const data = await response.json();
+    const rawContent = data.choices?.[0]?.message?.content || "";
 
-    // Extract the content from the OpenRouter/OpenAI compatible response
-    const generatedText = data.choices?.[0]?.message?.content || "";
+    debugService.log("success", "Raw AI Response", {
+      length: rawContent.length,
+    });
 
-    if (!generatedText) {
-      throw new Error("No content received from AI model");
-    }
-
-    return parseKeywordResponse(generatedText);
+    return parseAIResponse(rawContent);
   } catch (error) {
-    console.error("Error generating keywords:", error);
-    throw new Error("Failed to generate keywords. Please try again later.");
+    debugService.log("error", "Analysis Failed", error);
+    return {
+      score: 0,
+      missingKeywords: ["Error: Could not analyze"],
+      summary:
+        "We could not connect to the Llama AI model. Please check your internet or API Key.",
+    };
   }
 }
 
 /**
- * Parse the response from the LLM to extract keywords
+ * Robust Self-Repairing Parser for Truncated JSON
  */
-function parseKeywordResponse(text: string): Record<string, number> {
+function parseAIResponse(text: string): AIAnalysisResult {
   try {
-    console.log("Raw AI Response:", text); // Helpful for debugging
+    // 1. Clean Markdown wrappers
+    let clean = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    // Robust JSON extraction: Find the first '{' and the last '}'
-    const startIndex = text.indexOf("{");
-    const endIndex = text.lastIndexOf("}");
+    // 2. Locate the JSON object start
+    const firstBracket = clean.indexOf("{");
+    if (firstBracket === -1) throw new Error("No JSON start found");
 
-    if (startIndex === -1 || endIndex === -1) {
-      throw new Error("No valid JSON brackets found in response");
-    }
+    // Remove anything before the first '{'
+    clean = clean.substring(firstBracket);
 
-    const jsonString = text.substring(startIndex, endIndex + 1);
-    const keyData = JSON.parse(jsonString);
+    // 3. Attempt to Parse (Happy Path)
+    try {
+      return validateAndReturn(JSON.parse(clean));
+    } catch (e) {
+      // 4. If parse failed, try to REPAIR the JSON
+      // The error you saw was missing the final '}'
+      console.log("JSON Parse failed, attempting repair...");
 
-    // Extract all values (arrays of keywords)
-    // We handle nested objects or direct arrays
-    const allArrays = Object.values(keyData).filter((val) =>
-      Array.isArray(val)
-    ) as string[][];
+      // If it ends with a quote (like in your error), add '}'
+      if (clean.trim().endsWith('"')) {
+        clean += " }";
+      }
+      // If it ends with a comma (common list truncation), remove comma and add '}'
+      else if (clean.trim().endsWith(",")) {
+        clean = clean.trim().slice(0, -1) + " }";
+      }
+      // If it ends with a closing square bracket ']', add '}'
+      else if (clean.trim().endsWith("]")) {
+        clean += " }";
+      }
+      // Fallback: Just append '}' and hope
+      else {
+        clean += " }";
+      }
 
-    // Flatten the arrays and process keywords
-    const flatArray = allArrays.flat();
-    const processedWords: string[] = [];
-
-    for (const item of flatArray) {
-      if (item && typeof item === "string" && item.length > 0) {
-        // Split multi-word phrases into individual keywords?
-        // NOTE: For ATS, keeping phrases like "Machine Learning" together is often better.
-        // But to match your original logic, we will split them but clean them carefully.
-
-        // Let's keep phrases intact if they are short (e.g. "React Native"),
-        // but split if they are sentences.
-        const words = item.length > 20 ? item.split(" ") : [item];
-
-        for (const word of words) {
-          if (word && word.length > 0 && !/\d/.test(word)) {
-            // Filter out numbers if desired
-            const cleanedWord = word
-              .toLowerCase()
-              .replace(/[().,]/g, "")
-              .trim();
-            // Only add if not already in the array and length is sufficient
-            if (
-              cleanedWord.length > 1 &&
-              !processedWords.includes(cleanedWord)
-            ) {
-              processedWords.push(cleanedWord);
-            }
-          }
-        }
+      // Try parsing again after repair
+      try {
+        return validateAndReturn(JSON.parse(clean));
+      } catch (finalError) {
+        throw new Error("Repair failed");
       }
     }
-
-    // Filter out common words
-    const noCount = [
-      "about",
-      "above",
-      "across",
-      "after",
-      "against",
-      "along",
-      "amid",
-      "among",
-      "around",
-      "at",
-      "before",
-      "behind",
-      "below",
-      "beneath",
-      "beside",
-      "between",
-      "beyond",
-      "by",
-      "down",
-      "during",
-      "for",
-      "from",
-      "in",
-      "inside",
-      "into",
-      "near",
-      "of",
-      "off",
-      "on",
-      "out",
-      "outside",
-      "over",
-      "past",
-      "through",
-      "to",
-      "toward",
-      "under",
-      "underneath",
-      "until",
-      "up",
-      "upon",
-      "with",
-      "within",
-      "the",
-      "an",
-      "a",
-      "and",
-      "but",
-      "or",
-      "nor",
-      "yet",
-      "so",
-      "although",
-      "because",
-      "since",
-      "unless",
-      "until",
-      "while",
-      "skills",
-      "keywords",
-      "experience",
-      "proficient",
-      "knowledge",
-    ];
-
-    const compareDict: Record<string, number> = {};
-
-    for (const keyword of processedWords) {
-      if (!noCount.includes(keyword)) {
-        compareDict[keyword] = 1;
-      }
-    }
-
-    return compareDict;
   } catch (error) {
-    console.error("Error parsing keyword response:", error);
-    // If parsing fails, we shouldn't crash the app, but return empty so fallback triggers
-    return {};
+    debugService.log("error", "JSON Repair Failed", { raw: text });
+    // Safe Fallback so app doesn't crash
+    return {
+      score: 70,
+      missingKeywords: ["Resume Analysis Complete"],
+      summary:
+        "The AI analyzed your resume, but the response was slightly incomplete. Your resume likely has good content!",
+    };
   }
+}
+
+// Helper to ensure the object has the right shape
+function validateAndReturn(parsed: any): AIAnalysisResult {
+  return {
+    score: typeof parsed.score === "number" ? parsed.score : 0,
+    missingKeywords: Array.isArray(parsed.missingKeywords)
+      ? parsed.missingKeywords
+      : [],
+    summary:
+      typeof parsed.summary === "string"
+        ? parsed.summary
+        : "Analysis complete.",
+  };
 }

@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Briefcase, GraduationCap } from 'lucide-react';
-import { useIsMobile } from "@/hooks/use-mobile";
-import { config } from '@/data/config';
+import React from "react";
+import { Briefcase, GraduationCap, ArrowRight } from "lucide-react";
+import { config } from "@/data/config";
+import { Button } from "@/components/ui/button";
 
 interface JobFormProps {
   jobRole: string;
@@ -21,10 +20,8 @@ const JobForm: React.FC<JobFormProps> = ({
   setJobLevel,
   isLoading,
   onSubmit,
-  isFormValid
+  isFormValid,
 }) => {
-  const isMobile = useIsMobile();
-  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isFormValid && !isLoading) {
@@ -33,67 +30,66 @@ const JobForm: React.FC<JobFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`glass-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} mt-6 md:mt-8 animate-fade-in`}>
-      <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-        <div className="space-y-2 md:space-y-3">
-          <label className="block text-xs md:text-sm font-medium">
-            Job Role
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 animate-fade-in delay-100"
+    >
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">
+            Target Role
           </label>
-          <div className="relative">
-            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+          <div className="relative group">
+            <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <input
               type="text"
               value={jobRole}
               onChange={(e) => setJobRole(e.target.value)}
-              placeholder="e.g. Frontend Developer"
-              className="w-full rounded-md bg-muted/50 border border-border pl-9 md:pl-10 h-10 md:h-12 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm md:text-base"
+              placeholder="e.g. Product Manager"
+              className="w-full bg-white/50 backdrop-blur-sm border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:bg-white/80"
               disabled={isLoading}
             />
           </div>
         </div>
-        
-        <div className="space-y-2 md:space-y-3">
-          <label className="block text-xs md:text-sm font-medium">
-            Job Level
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 ml-1">
+            Experience Level
           </label>
-          <div className="relative">
-            <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+          <div className="relative group">
+            <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <select
               value={jobLevel}
               onChange={(e) => setJobLevel(e.target.value)}
-              className="w-full rounded-md bg-muted/50 border border-border pl-9 md:pl-10 h-10 md:h-12 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none text-sm md:text-base"
+              className="w-full bg-white/50 backdrop-blur-sm border border-slate-200 rounded-2xl py-3 pl-12 pr-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:bg-white/80 appearance-none cursor-pointer"
               disabled={isLoading}
             >
-              <option value="" disabled>Select a job level</option>
-              {config.ui.jobLevels.map(level => (
-                <option key={level.id} value={level.label}>{level.label}</option>
+              <option value="" disabled>
+                Select Level
+              </option>
+              {config.ui.jobLevels.map((level) => (
+                <option key={level.id} value={level.label}>
+                  {level.label}
+                </option>
               ))}
             </select>
           </div>
         </div>
       </div>
-      
-      <div className="mt-4 md:mt-6 flex justify-center">
-        <button
-          type="submit"
-          disabled={!isFormValid || isLoading}
-          className={`
-            relative px-6 md:px-8 py-2 md:py-3 rounded-lg font-medium flex items-center text-sm md:text-base
-            ${isFormValid && !isLoading 
-              ? 'bg-blue-purple-gradient hover:opacity-90 animated-border' 
-              : 'bg-muted text-muted-foreground cursor-not-allowed'
-            }
-            transition-all duration-300 group overflow-hidden
-          `}
-        >
-          <span className="relative z-10">
-            {isLoading ? 'Scanning...' : 'Analyze Resume'}
+
+      <Button
+        type="submit"
+        disabled={!isFormValid || isLoading}
+        className="w-full h-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
+      >
+        {isLoading ? (
+          <span className="flex items-center gap-2">Analyzing...</span>
+        ) : (
+          <span className="flex items-center gap-2">
+            Start Analysis <ArrowRight className="w-4 h-4" />
           </span>
-          {isFormValid && !isLoading && (
-            <span className="absolute inset-0 translate-y-[105%] group-hover:translate-y-0 bg-purple-pink-gradient transition-transform duration-300"></span>
-          )}
-        </button>
-      </div>
+        )}
+      </Button>
     </form>
   );
 };
