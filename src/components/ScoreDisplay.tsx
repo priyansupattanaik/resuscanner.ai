@@ -1,94 +1,139 @@
-
-import React, { useState, useEffect } from 'react';
-import { CircleCheck } from 'lucide-react';
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 interface ScoreDisplayProps {
   score: number;
   isVisible: boolean;
+  missingKeywords?: string[]; // Made optional to prevent crashes if undefined
 }
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score, isVisible }) => {
-  const [displayScore, setDisplayScore] = useState(0);
-  const roundedScore = Math.round(score * 100) / 100;
-  const isMobile = useIsMobile();
-  
-  useEffect(() => {
-    if (!isVisible) {
-      setDisplayScore(0);
-      return;
-    }
-    
-    const duration = 2000; // 2 seconds animation
-    const steps = 50;
-    const stepValue = roundedScore / steps;
-    const stepDuration = duration / steps;
-    
-    let currentStep = 0;
-    
-    const timer = setInterval(() => {
-      currentStep += 1;
-      if (currentStep <= steps) {
-        setDisplayScore(Math.min(stepValue * currentStep, roundedScore));
-      } else {
-        clearInterval(timer);
-      }
-    }, stepDuration);
-    
-    return () => clearInterval(timer);
-  }, [isVisible, roundedScore]);
-  
+const ScoreDisplay = ({
+  score,
+  isVisible,
+  missingKeywords = [],
+}: ScoreDisplayProps) => {
   if (!isVisible) return null;
-  
-  const getScoreColor = () => {
-    if (roundedScore >= 80) return 'text-green-400';
-    if (roundedScore >= 60) return 'text-yellow-400';
-    return 'text-red-400';
+
+  // Chart Data for the Gauge
+  const data = [
+    { name: "Score", value: score },
+    { name: "Remaining", value: 100 - score },
+  ];
+
+  // Color logic based on score
+  const getColor = (value: number) => {
+    if (value >= 80) return "#22c55e"; // Green
+    if (value >= 60) return "#eab308"; // Yellow
+    return "#ef4444"; // Red
   };
-  
-  const circleSize = isMobile ? 'w-32 h-32' : 'w-44 h-44';
-  
+
+  const primaryColor = getColor(score);
+
   return (
-    <div className={`glass-card rounded-xl ${isMobile ? 'p-5' : 'p-8'} mt-6 md:mt-8 text-center animate-scale-up`}>
-      <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-6 md:mb-8`}>ATS Score (based on keyword analysis)</h2>
-      
-      <div className="relative inline-block">
-        <div className={`${circleSize} rounded-full border-8 border-muted flex items-center justify-center relative animate-pulse-glow`}>
-          <span className={`${isMobile ? 'text-4xl' : 'text-5xl'} font-bold ${getScoreColor()}`}>
-            {displayScore.toFixed(1)}
-          </span>
-          <span className={`${isMobile ? 'text-lg' : 'text-xl'} font-medium absolute -right-2 top-1/3`}>/ 100</span>
-          
-          <div className={`absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-muted rounded-full p-1 md:p-1.5`}>
-            <CircleCheck className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-primary`} />
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Score Card */}
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+          <CardTitle className="text-lg font-medium text-slate-700 flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full`}
+              style={{ backgroundColor: primaryColor }}
+            />
+            ATS Compatibility Score
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* The Gauge Chart */}
+            <div className="relative h-48 w-48 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    startAngle={180}
+                    endAngle={0}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={0}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    <Cell fill={primaryColor} />
+                    <Cell fill="#f1f5f9" /> {/* Slate-100 for empty part */}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Centered Text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
+                <span className="text-4xl font-bold text-slate-900">
+                  {Math.round(score)}
+                </span>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  / 100
+                </span>
+              </div>
+            </div>
+
+            {/* Score Interpretation */}
+            <div className="flex-1 space-y-4 text-center md:text-left">
+              <div>
+                <h3 className="text-2xl font-semibold text-slate-900">
+                  {score >= 80
+                    ? "Excellent Match"
+                    : score >= 60
+                    ? "Good Potential"
+                    : "Needs Improvement"}
+                </h3>
+                <p className="text-slate-500 mt-1">
+                  {score >= 80
+                    ? "Your resume is highly optimized for this role."
+                    : "You are missing some critical keywords found in the job description."}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <svg className="absolute inset-0" viewBox="0 0 160 160">
-          <circle
-            cx="80"
-            cy="80"
-            r="70"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="8"
-            strokeDasharray="440"
-            strokeDashoffset={440 - (440 * displayScore) / 100}
-            strokeLinecap="round"
-            className={`transform -rotate-90 origin-center transition-all duration-1000 ease-out ${getScoreColor()}`}
-          />
-        </svg>
-      </div>
-      
-      <div className="mt-4 md:mt-6 text-muted-foreground text-xs md:text-sm">
-        {roundedScore >= 80 ? (
-          <p>Excellent! Your resume is well-optimized for ATS systems.</p>
-        ) : roundedScore >= 60 ? (
-          <p>Good job! Consider adding a few more keywords for better results.</p>
-        ) : (
-          <p>Your resume needs optimization. Check the suggestions below.</p>
-        )}
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Missing Keywords Analysis */}
+      {missingKeywords.length > 0 && (
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+            <CardTitle className="text-lg font-medium text-slate-700 flex items-center justify-between">
+              <span>Missing Keywords</span>
+              <Badge
+                variant="secondary"
+                className="bg-slate-100 text-slate-600"
+              >
+                {missingKeywords.length} Found
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p className="text-sm text-slate-500 mb-4">
+              Adding these keywords to your resume (contextually) may improve
+              your ATS ranking.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {missingKeywords.map((keyword, idx) => (
+                <Badge
+                  key={idx}
+                  variant="outline"
+                  className="px-3 py-1.5 text-sm border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors flex items-center gap-1.5"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {keyword}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

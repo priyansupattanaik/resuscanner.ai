@@ -1,121 +1,112 @@
-
-import React, { useState, useRef } from 'react';
-import { Upload, FileUp, Check, AlertCircle } from 'lucide-react';
-import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useCallback, useState } from "react";
+import { UploadCloud, FileText, X, Check } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 interface FileUploaderProps {
   onFileChange: (file: File | null) => void;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onFileChange }) => {
+const FileUploader = ({ onFileChange }: FileUploaderProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
 
-  const handleFileChange = (selectedFile: File | null) => {
-    setError(null);
-    
-    if (!selectedFile) {
-      setFile(null);
-      onFileChange(null);
-      return;
-    }
-    
-    if (selectedFile.type !== 'application/pdf') {
-      setError('Please upload a PDF file');
-      return;
-    }
-    
-    setFile(selectedFile);
-    onFileChange(selectedFile);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        const selectedFile = acceptedFiles[0];
+        if (selectedFile.type !== "application/pdf") {
+          toast({
+            variant: "destructive",
+            title: "Invalid file type",
+            description: "Please upload a PDF document.",
+          });
+          return;
+        }
+        setFile(selectedFile);
+        onFileChange(selectedFile);
+      }
+    },
+    [onFileChange]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] },
+    maxFiles: 1,
+    multiple: false,
+  });
+
+  const removeFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFile(null);
+    onFileChange(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
-    handleFileChange(selectedFile);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const droppedFile = e.dataTransfer.files?.[0] || null;
-    handleFileChange(droppedFile);
-  };
-
-  const triggerFileInput = () => {
-    inputRef.current?.click();
-  };
-
-  return (
-    <div 
-      className={`glass-card ${isMobile ? 'p-4' : 'p-8'} rounded-xl transition-all duration-300 animate-fade-in ${
-        isDragging ? 'border-primary border-2 shadow-lg shadow-primary/20' : ''
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <input
-        type="file"
-        ref={inputRef}
-        accept=".pdf"
-        onChange={handleInputChange}
-        className="hidden"
-      />
-      
-      <div className="flex flex-col items-center justify-center text-center">
-        {file ? (
-          <div className="space-y-2 md:space-y-3">
-            <div className={`${isMobile ? 'h-10 w-10' : 'h-12 w-12'} rounded-full bg-primary/20 flex items-center justify-center mx-auto`}>
-              <Check className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-primary`} />
-            </div>
-            <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-medium break-all px-2`}>{file.name}</h3>
-            <p className="text-muted-foreground text-xs md:text-sm">
+  if (file) {
+    // Compact View when file is selected
+    return (
+      <div className="w-full p-4 bg-blue-50/50 border border-blue-200 rounded-xl flex items-center justify-between animate-in fade-in zoom-in-95">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 text-blue-600" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate max-w-[200px]">
+              {file.name}
+            </p>
+            <p className="text-xs text-slate-500">
               {(file.size / 1024 / 1024).toFixed(2)} MB
             </p>
-            <button
-              onClick={triggerFileInput}
-              className="mt-2 md:mt-4 text-xs md:text-sm text-primary hover:text-primary/80 transition-colors"
-            >
-              Change file
-            </button>
           </div>
-        ) : (
-          <div className="space-y-3 md:space-y-4">
-            <div className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} rounded-full bg-muted flex items-center justify-center mx-auto animate-pulse-glow`}>
-              <Upload className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'} text-primary`} />
-            </div>
-            <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-medium`}>Upload your resume</h3>
-            <p className="text-muted-foreground max-w-sm text-xs md:text-sm">
-              {isMobile ? 'Tap to select a PDF resume' : 'Drag and drop your PDF resume here or click to browse'}
-            </p>
-            {error && (
-              <div className="flex items-center justify-center text-destructive gap-1 text-xs md:text-sm">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
-              </div>
-            )}
-            <button
-              onClick={triggerFileInput}
-              className="px-3 py-1.5 md:px-4 md:py-2 rounded-md bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-2 mx-auto text-xs md:text-sm"
-            >
-              <FileUp className="h-3 w-3 md:h-4 md:w-4" />
-              <span>Browse files</span>
-            </button>
-          </div>
-        )}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={removeFile}
+          className="text-slate-400 hover:text-red-500 hover:bg-red-50"
+        >
+          <X className="w-5 h-5" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Drag & Drop View
+  return (
+    <div
+      {...getRootProps()}
+      className={`
+        relative overflow-hidden rounded-xl border-2 border-dashed p-8 transition-all duration-300 cursor-pointer text-center group
+        ${
+          isDragActive
+            ? "border-blue-500 bg-blue-50/50 scale-[0.99]"
+            : "border-slate-200 hover:border-blue-400 hover:bg-slate-50/50"
+        }
+      `}
+    >
+      <input {...getInputProps()} />
+      <div className="flex flex-col items-center justify-center gap-3">
+        <div
+          className={`
+          p-3 rounded-full transition-colors duration-300
+          ${
+            isDragActive
+              ? "bg-blue-100 text-blue-600"
+              : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-500"
+          }
+        `}
+        >
+          <UploadCloud className="w-6 h-6" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-slate-900">
+            {isDragActive
+              ? "Drop resume here"
+              : "Click to upload or drag and drop"}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">PDF only (Max 5MB)</p>
+        </div>
       </div>
     </div>
   );
