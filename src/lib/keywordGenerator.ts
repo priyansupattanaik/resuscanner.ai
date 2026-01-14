@@ -9,7 +9,8 @@ export interface AIAnalysisResult {
 export async function generateResumeAnalysis(
   resumeText: string,
   jobRole: string,
-  jobLevel: string
+  jobLevel: string,
+  jobDescription?: string
 ): Promise<AIAnalysisResult> {
   try {
     // 1. Strict System Instruction
@@ -20,8 +21,17 @@ export async function generateResumeAnalysis(
     3. Do NOT add conversational text.
     4. Structure: {"score": number, "missingKeywords": string[], "summary": string}`;
 
-    // 2. User Prompt
-    const userPrompt = `Analyze this resume for the role: "${jobLevel} ${jobRole}".
+    // 2. Build Context Aware Prompt
+    let contextPrompt = `Analyze this resume for the role: "${jobLevel} ${jobRole}".`;
+
+    if (jobDescription && jobDescription.trim().length > 50) {
+      contextPrompt += `\n\nJOB DESCRIPTION:\n"${jobDescription.slice(0, 5000)}"
+        \nINSTRUCTION: Compare the resume strictly against the keywords and requirements in the Job Description above.`;
+    } else {
+      contextPrompt += `\nINSTRUCTION: Since no job description was provided, infer standard industry requirements for this role.`;
+    }
+
+    const userPrompt = `${contextPrompt}
     
     RESUME TEXT:
     "${resumeText.slice(0, 10000)}"
@@ -30,7 +40,7 @@ export async function generateResumeAnalysis(
     {
       "score": <0-100>,
       "missingKeywords": ["skill1", "skill2"],
-      "summary": "<short feedback>"
+      "summary": "<short feedback comparing resume vs job requirements>"
     }`;
 
     // 3. Call OpenRouter

@@ -15,7 +15,8 @@ export interface ScanResult {
 export async function scanResume(
   resumeFile: File,
   jobRole: string,
-  jobLevel: string
+  jobLevel: string,
+  jobDescription?: string // [New optional param]
 ): Promise<ScanResult> {
   try {
     const resumeText = await extractTextFromPdf(resumeFile);
@@ -27,7 +28,8 @@ export async function scanResume(
     const analysis = await generateResumeAnalysis(
       resumeText,
       jobRole,
-      jobLevel
+      jobLevel,
+      jobDescription
     );
 
     return {
