@@ -1,8 +1,9 @@
+// src/data/config.ts
 // DEBUG: Check if key is loaded (Prints to Console)
-const rawKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+const rawKey = import.meta.env.VITE_GROQ_API_KEY;
 console.log(
   "System Status:",
-  rawKey ? "Key Loaded" : "Key Missing (Check .env)"
+  rawKey ? "Key Loaded" : "Key Missing (Check .env for VITE_GROQ_API_KEY)",
 );
 
 export const config = {
@@ -13,11 +14,13 @@ export const config = {
   },
   api: {
     apiKey: rawKey || "",
-    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    // Updated: Groq API Endpoint
+    endpoint: "https://api.groq.com/openai/v1/chat/completions",
 
-    // ✅ Using Llama 3.2 3B Free
-    model: "meta-llama/llama-3.2-3b-instruct:free",
+    // Updated: Using Llama 3.3 70B Versatile (Supported by Groq)
+    model: "llama-3.3-70b-versatile",
 
+    // Kept for compatibility, though Groq doesn't strictly enforce these like OpenRouter
     siteUrl: import.meta.env.VITE_SITE_URL || "http://localhost:5173",
     siteName: import.meta.env.VITE_SITE_NAME || "ResuScanner.AI",
   },

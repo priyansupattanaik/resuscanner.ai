@@ -10,7 +10,7 @@ export async function generateResumeAnalysis(
   resumeText: string,
   jobRole: string,
   jobLevel: string,
-  jobDescription?: string
+  jobDescription?: string,
 ): Promise<AIAnalysisResult> {
   try {
     // 1. Strict System Instruction
@@ -43,14 +43,12 @@ export async function generateResumeAnalysis(
       "summary": "<short feedback comparing resume vs job requirements>"
     }`;
 
-    // 3. Call OpenRouter
+    // 3. Call Groq API
     const response = await fetch(config.api.endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${config.api.apiKey}`,
-        "HTTP-Referer": config.api.siteUrl,
-        "X-Title": config.api.siteName,
       },
       body: JSON.stringify({
         model: config.api.model,
@@ -60,6 +58,7 @@ export async function generateResumeAnalysis(
         ],
         temperature: 0.1, // Near zero for consistency
         max_tokens: 2000,
+        response_format: { type: "json_object" }, // Groq Optimization
       }),
     });
 

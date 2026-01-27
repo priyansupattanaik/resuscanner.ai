@@ -8,7 +8,7 @@ export interface ChatMessage {
 export async function sendChatMessage(
   history: ChatMessage[],
   resumeContext: string,
-  jobRole: string
+  jobRole: string,
 ): Promise<string> {
   try {
     // Removed debugService, using standard console for errors only
@@ -33,8 +33,6 @@ export async function sendChatMessage(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${config.api.apiKey}`,
-        "HTTP-Referer": config.api.siteUrl,
-        "X-Title": config.api.siteName,
       },
       body: JSON.stringify(payload),
     });
