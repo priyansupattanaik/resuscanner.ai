@@ -4,9 +4,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  Hash,
   FileText,
   ListChecks,
+  Ban,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +15,15 @@ interface ScoreDisplayProps {
 }
 
 const ScoreDisplay = ({ result }: ScoreDisplayProps) => {
-  const { score, missingKeywords, summary, jobRole } = result;
+  const { score, missingKeywords, summary } = result;
 
   const getStatus = (s: number) => {
+    if (s < 15)
+      return {
+        color: "bg-black",
+        text: "AUTO-REJECTED",
+        textCol: "text-red-600",
+      }; // New Reject State
     if (s >= 80)
       return {
         color: "bg-emerald-500",
@@ -39,6 +45,30 @@ const ScoreDisplay = ({ result }: ScoreDisplayProps) => {
 
   const status = getStatus(score);
 
+  // Special UI for Auto-Rejection (Score < 15)
+  if (score < 15) {
+    return (
+      <div className="space-y-6 h-full overflow-y-auto pr-1">
+        <div className="bg-rose-50 border-2 border-rose-500 p-8 neo-shadow text-center">
+          <Ban className="w-16 h-16 text-rose-500 mx-auto mb-4" />
+          <h2 className="font-heading font-bold text-3xl uppercase text-rose-600 mb-2">
+            Application Rejected
+          </h2>
+          <p className="font-sans text-lg text-rose-800 mb-6">
+            TAS System: This resume is a critical mismatch for the target role.
+          </p>
+          <div className="bg-white border border-rose-200 p-4 text-left">
+            <p className="font-mono text-sm text-rose-700 font-bold uppercase mb-2">
+              System Feedback:
+            </p>
+            <p className="font-sans text-sm text-slate-700">{summary}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard UI for Valid Resumes
   return (
     <div className="space-y-6 h-full overflow-y-auto pr-1">
       {/* Top Row: Score & Summary */}

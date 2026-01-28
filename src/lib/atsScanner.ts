@@ -16,7 +16,7 @@ export async function scanResume(
   resumeFile: File,
   jobRole: string,
   jobLevel: string,
-  jobDescription?: string // [New optional param]
+  jobDescription?: string,
 ): Promise<ScanResult> {
   try {
     const resumeText = await extractTextFromPdf(resumeFile);
@@ -29,7 +29,7 @@ export async function scanResume(
       resumeText,
       jobRole,
       jobLevel,
-      jobDescription
+      jobDescription,
     );
 
     return {
