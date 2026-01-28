@@ -4,8 +4,9 @@ import FileUploader from "@/components/FileUploader";
 import JobForm from "@/components/JobForm";
 import ScoreDisplay from "@/components/ScoreDisplay";
 import ChatAssistant from "@/components/ChatAssistant";
+import ResumeForge from "@/components/ResumeForge"; // Import Forge
 import { useScan } from "@/context/ScanContext";
-import { Loader2 } from "lucide-react";
+import { Loader2, Hammer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
@@ -23,7 +24,10 @@ const Index = () => {
     file,
   } = useScan();
 
-  const [mobileTab, setMobileTab] = useState<"score" | "chat">("score");
+  // Updated Tab State to include 'forge'
+  const [mobileTab, setMobileTab] = useState<"score" | "chat" | "forge">(
+    "score",
+  );
   const isFormValid = !!file && !!jobRole && !!jobLevel;
 
   return (
@@ -122,11 +126,12 @@ const Index = () => {
                 </div>
               </div>
 
+              {/* Mobile Toggle */}
               <div className="lg:hidden flex border-2 border-black bg-white">
                 <button
                   onClick={() => setMobileTab("score")}
                   className={cn(
-                    "px-4 py-2 text-xs font-bold uppercase transition-colors",
+                    "px-3 py-2 text-[10px] font-bold uppercase transition-colors",
                     mobileTab === "score"
                       ? "bg-black text-white"
                       : "text-slate-500",
@@ -135,36 +140,59 @@ const Index = () => {
                   Report
                 </button>
                 <button
+                  onClick={() => setMobileTab("forge")}
+                  className={cn(
+                    "px-3 py-2 text-[10px] font-bold uppercase transition-colors border-l border-black",
+                    mobileTab === "forge"
+                      ? "bg-black text-white"
+                      : "text-slate-500",
+                  )}
+                >
+                  Forge
+                </button>
+                <button
                   onClick={() => setMobileTab("chat")}
                   className={cn(
-                    "px-4 py-2 text-xs font-bold uppercase transition-colors",
+                    "px-3 py-2 text-[10px] font-bold uppercase transition-colors border-l border-black",
                     mobileTab === "chat"
                       ? "bg-black text-white"
                       : "text-slate-500",
                   )}
                 >
-                  Assistant
+                  Chat
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 min-h-0 grid lg:grid-cols-2 gap-6 overflow-y-auto lg:overflow-visible pb-4">
+            {/* Content Grid */}
+            <div className="flex-1 min-h-0 grid lg:grid-cols-3 gap-6 overflow-y-auto lg:overflow-visible pb-4">
+              {/* Col 1: Score (Left) */}
               <div
                 className={cn(
-                  "h-full overflow-y-auto pr-2 custom-scrollbar lg:block",
-                  mobileTab === "score" ? "block" : "hidden",
+                  "h-full overflow-y-auto pr-2 custom-scrollbar lg:col-span-1",
+                  mobileTab === "score" ? "block" : "hidden lg:block",
                 )}
               >
                 <ScoreDisplay result={result} />
               </div>
 
+              {/* Col 2: Forge (Center - New) */}
               <div
                 className={cn(
-                  "h-full min-h-[500px] lg:block",
-                  mobileTab === "chat" ? "block" : "hidden",
+                  "h-full lg:col-span-1",
+                  mobileTab === "forge" ? "block" : "hidden lg:block",
                 )}
               >
-                {/* UPDATED: Passing full result object */}
+                <ResumeForge jobRole={result.jobRole} />
+              </div>
+
+              {/* Col 3: Chat (Right) */}
+              <div
+                className={cn(
+                  "h-full min-h-[500px] lg:col-span-1",
+                  mobileTab === "chat" ? "block" : "hidden lg:block",
+                )}
+              >
                 <ChatAssistant scanResult={result} />
               </div>
             </div>
