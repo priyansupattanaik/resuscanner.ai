@@ -13,34 +13,51 @@ export async function generateResumeAnalysis(
   jobDescription?: string,
 ): Promise<AIAnalysisResult> {
   try {
-    // 1. Strict System Instruction
-    const systemInstruction = `You are a strict JSON Data Extraction Engine.
-    RULES:
-    1. Output ONLY valid JSON.
-    2. Do NOT use Markdown.
-    3. Do NOT add conversational text.
-    4. Structure: {"score": number, "missingKeywords": string[], "summary": string}`;
+    // 1. The "Ruthless" System Instruction
+    const systemInstruction = `You are TAS (Talent Acquisition Specialist), a strict Recruitment AI.
 
-    // 2. Build Context Aware Prompt
-    let contextPrompt = `Analyze this resume for the role: "${jobLevel} ${jobRole}".`;
+    CRITICAL RULES:
+    1. ZERO-BASE SCORING: Start at 0. Points are only earned, never given for free.
+    2. RELEVANCE CHECK (THE KILL SWITCH): If the candidate's resume is NOT relevant to the Target Role (e.g., Marketing resume for an Engineering role), the Score MUST be between 0 and 15. NO EXCEPTIONS. Do not give "participation points" for soft skills if the hard skills are wrong.
+    3. THE "DUAL-LENS" SCORING (Max 100):
+       - Hard Skills Match (Keywords/Tools): Max 40 pts. (0 pts if irrelevant).
+       - Impact & Metrics (Numbers/%): Max 30 pts.
+       - Experience Relevance: Max 20 pts.
+       - Formatting & Soft Skills: Max 10 pts.
+    
+    OUTPUT FORMAT:
+    Return strictly JSON:
+    {
+      "score": <number>,
+      "missingKeywords": ["List critical missing hard skills"],
+      "summary": "<TAS Feedback. Be blunt. If irrelevant, say: 'This resume is a mismatch. You applied for [Role] but this is a [Actual Role] resume.'>"
+    }`;
+
+    // 2. Build Prompt
+    let contextPrompt = `TARGET ROLE: "${jobLevel} ${jobRole}"`;
 
     if (jobDescription && jobDescription.trim().length > 50) {
-      contextPrompt += `\n\nJOB DESCRIPTION:\n"${jobDescription.slice(0, 5000)}"
-        \nINSTRUCTION: Compare the resume strictly against the keywords and requirements in the Job Description above.`;
+      contextPrompt += `\nSPECIFIC JD REQUIREMENTS:\n"${jobDescription.slice(0, 5000)}"`;
     } else {
-      contextPrompt += `\nINSTRUCTION: Since no job description was provided, infer standard industry requirements for this role.`;
+      contextPrompt += `\nNO JD PROVIDED. Use strict industry standards for ${jobRole}.`;
     }
 
     const userPrompt = `${contextPrompt}
-    
-    RESUME TEXT:
-    "${resumeText.slice(0, 10000)}"
 
-    REQUIRED JSON:
+    CANDIDATE RESUME:
+    "${resumeText.slice(0, 15000)}"
+
+    INSTRUCTIONS:
+    1. First, determine if this resume matches the domain of "${jobRole}".
+    2. If NO match (e.g. Sales resume for Coding job) -> Score < 15.
+    3. If YES match -> Calculate score based on Impact (Metrics) and Keyword coverage.
+    4. List ALL missing critical keywords.
+    
+    REQUIRED JSON OUTPUT:
     {
-      "score": <0-100>,
-      "missingKeywords": ["skill1", "skill2"],
-      "summary": "<short feedback comparing resume vs job requirements>"
+      "score": number,
+      "missingKeywords": string[],
+      "summary": string
     }`;
 
     // 3. Call Groq API
@@ -56,9 +73,9 @@ export async function generateResumeAnalysis(
           { role: "system", content: systemInstruction },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.1, // Near zero for consistency
-        max_tokens: 2000,
-        response_format: { type: "json_object" }, // Groq Optimization
+        temperature: 0.1,
+        max_tokens: 1000,
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -76,48 +93,27 @@ export async function generateResumeAnalysis(
     console.error("Analysis Failed", error);
     return {
       score: 0,
-      missingKeywords: ["Error: Could not analyze"],
+      missingKeywords: ["Connection Failure"],
       summary:
-        "We could not connect to the AI model. Please check your internet or API Key.",
+        "TAS System Alert: Critical connection failure. Unable to access the analysis engine.",
     };
   }
 }
 
-/**
- * Robust Self-Repairing Parser for Truncated JSON
- */
 function parseAIResponse(text: string): AIAnalysisResult {
   try {
-    // 1. Clean Markdown wrappers
     let clean = text
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-
-    // 2. Locate the JSON object start
     const firstBracket = clean.indexOf("{");
     if (firstBracket === -1) throw new Error("No JSON start found");
-
-    // Remove anything before the first '{'
     clean = clean.substring(firstBracket);
 
-    // 3. Attempt to Parse (Happy Path)
     try {
       return validateAndReturn(JSON.parse(clean));
     } catch (e) {
-      // 4. If parse failed, try to REPAIR the JSON
-      console.log("JSON Parse failed, attempting repair...");
-
-      if (clean.trim().endsWith('"')) {
-        clean += " }";
-      } else if (clean.trim().endsWith(",")) {
-        clean = clean.trim().slice(0, -1) + " }";
-      } else if (clean.trim().endsWith("]")) {
-        clean += " }";
-      } else {
-        clean += " }";
-      }
-
+      if (!clean.endsWith("}")) clean += "}";
       try {
         return validateAndReturn(JSON.parse(clean));
       } catch (finalError) {
@@ -125,12 +121,10 @@ function parseAIResponse(text: string): AIAnalysisResult {
       }
     }
   } catch (error) {
-    console.error("JSON Repair Failed", { raw: text });
     return {
-      score: 70,
-      missingKeywords: ["Resume Analysis Complete"],
-      summary:
-        "The AI analyzed your resume, but the response was slightly incomplete. Your resume likely has good content!",
+      score: 0,
+      missingKeywords: ["Error"],
+      summary: "Analysis Error: Could not parse AI response.",
     };
   }
 }

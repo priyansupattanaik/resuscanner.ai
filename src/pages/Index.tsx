@@ -5,9 +5,8 @@ import JobForm from "@/components/JobForm";
 import ScoreDisplay from "@/components/ScoreDisplay";
 import ChatAssistant from "@/components/ChatAssistant";
 import { useScan } from "@/context/ScanContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { FileText, MessageSquare } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const {
@@ -24,49 +23,49 @@ const Index = () => {
     file,
   } = useScan();
 
-  const [activeTab, setActiveTab] = useState("analysis");
-
+  const [mobileTab, setMobileTab] = useState<"score" | "chat">("score");
   const isFormValid = !!file && !!jobRole && !!jobLevel;
 
   return (
     <Layout>
-      <div className="space-y-8 pb-20">
-        {/* Welcome Header */}
-        {!result && (
-          <div className="text-center space-y-4 py-8 animate-fade-in px-2">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-              Resume Intelligence
-            </h1>
-            <p className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto">
-              Optimize your resume for Applicant Tracking Systems (ATS) with
-              enterprise-grade AI analysis.
-            </p>
-          </div>
-        )}
-
+      <div className="h-full flex flex-col justify-center">
         {/* INPUT MODE */}
         {!result && !isLoading && (
-          <div className="max-w-xl mx-auto space-y-8 animate-slide-up">
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
-              <div className="h-2 bg-indigo-600 w-full" />
-              <CardContent className="p-6 md:p-8 space-y-8">
-                <div className="space-y-4">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-xs">
-                      1
-                    </span>
-                    Upload Resume (PDF)
-                  </label>
-                  <FileUploader onFileChange={setFile} />
+          <div className="max-w-5xl mx-auto w-full animate-fade-in">
+            <div className="mb-8 text-left border-l-4 border-primary pl-6">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold uppercase tracking-tight text-black mb-2">
+                Resume Scanner
+              </h1>
+              <p className="font-sans text-lg text-slate-600 max-w-xl">
+                Analyze your resume against job descriptions using ATS-grade
+                algorithms.
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-black text-white text-xs font-bold px-2 py-0.5">
+                    STEP 1
+                  </span>
+                  <h3 className="font-heading font-bold text-xl uppercase">
+                    Upload PDF
+                  </h3>
+                </div>
+                <FileUploader onFileChange={setFile} />
+              </div>
+
+              <div className="lg:col-span-7 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-black text-white text-xs font-bold px-2 py-0.5">
+                    STEP 2
+                  </span>
+                  <h3 className="font-heading font-bold text-xl uppercase">
+                    Job Details
+                  </h3>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-xs">
-                      2
-                    </span>
-                    Target Position
-                  </label>
+                <div className="bg-white border-2 border-black p-6 neo-shadow hover:neo-shadow-lg transition-all duration-300">
                   <JobForm
                     jobRole={jobRole}
                     setJobRole={setJobRole}
@@ -79,78 +78,96 @@ const Index = () => {
                     isFormValid={isFormValid}
                   />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
         {/* LOADING MODE */}
         {isLoading && (
-          <div className="max-w-xl mx-auto mt-20 text-center space-y-6 animate-pulse px-4">
-            <div className="w-20 h-20 bg-indigo-100 rounded-full mx-auto flex items-center justify-center relative">
-              <div className="absolute inset-0 border-4 border-indigo-500/20 rounded-full animate-spin border-t-indigo-600" />
-              <FileText className="w-8 h-8 text-indigo-600" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-slate-900">
-                Analyzing Resume
-              </h3>
-              <p className="text-slate-500 mt-2">
-                Extracting keywords, checking ATS compatibility...
-              </p>
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <div className="max-w-md w-full border-2 border-black bg-white p-8 neo-shadow text-center space-y-6">
+              <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+              <div>
+                <h2 className="font-heading text-2xl font-bold uppercase mb-2">
+                  Analyzing...
+                </h2>
+                <p className="font-mono text-sm text-slate-500">
+                  Processing document structure and keywords.
+                </p>
+              </div>
+              <div className="w-full bg-slate-100 h-2 border border-black overflow-hidden">
+                <div
+                  className="h-full bg-primary animate-[slide-in_1.5s_infinite]"
+                  style={{ width: "50%" }}
+                ></div>
+              </div>
             </div>
           </div>
         )}
 
         {/* RESULT MODE */}
         {result && (
-          <div className="animate-fade-in space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="h-full flex flex-col animate-fade-in overflow-hidden">
+            <div className="flex items-center justify-between mb-4 shrink-0">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 break-words">
-                  {jobRole}
+                <h2 className="font-heading text-3xl font-bold uppercase text-black leading-none">
+                  Analysis Report
                 </h2>
-                <p className="text-slate-500 text-sm">Analysis Result</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <p className="font-mono text-xs font-bold text-slate-500 uppercase">
+                    {jobRole}
+                  </p>
+                </div>
               </div>
-              {/* Full width tabs on mobile */}
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full md:w-auto"
-              >
-                <TabsList className="bg-slate-100 border border-slate-200 w-full md:w-auto grid grid-cols-2 md:flex">
-                  <TabsTrigger value="analysis" className="gap-2">
-                    <FileText className="w-4 h-4" /> Analysis
-                  </TabsTrigger>
-                  <TabsTrigger value="chat" className="gap-2">
-                    <MessageSquare className="w-4 h-4" /> AI Coach
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+
+              <div className="lg:hidden flex border-2 border-black bg-white">
+                <button
+                  onClick={() => setMobileTab("score")}
+                  className={cn(
+                    "px-4 py-2 text-xs font-bold uppercase transition-colors",
+                    mobileTab === "score"
+                      ? "bg-black text-white"
+                      : "text-slate-500",
+                  )}
+                >
+                  Report
+                </button>
+                <button
+                  onClick={() => setMobileTab("chat")}
+                  className={cn(
+                    "px-4 py-2 text-xs font-bold uppercase transition-colors",
+                    mobileTab === "chat"
+                      ? "bg-black text-white"
+                      : "text-slate-500",
+                  )}
+                >
+                  Assistant
+                </button>
+              </div>
             </div>
 
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsContent
-                value="analysis"
-                className="mt-0 focus-visible:outline-none"
+            <div className="flex-1 min-h-0 grid lg:grid-cols-2 gap-6 overflow-y-auto lg:overflow-visible pb-4">
+              <div
+                className={cn(
+                  "h-full overflow-y-auto pr-2 custom-scrollbar lg:block",
+                  mobileTab === "score" ? "block" : "hidden",
+                )}
               >
                 <ScoreDisplay result={result} />
-              </TabsContent>
+              </div>
 
-              <TabsContent
-                value="chat"
-                className="mt-0 focus-visible:outline-none"
+              <div
+                className={cn(
+                  "h-full min-h-[500px] lg:block",
+                  mobileTab === "chat" ? "block" : "hidden",
+                )}
               >
-                <ChatAssistant
-                  resumeText={result.resumeText}
-                  jobRole={result.jobRole}
-                />
-              </TabsContent>
-            </Tabs>
+                {/* UPDATED: Passing full result object */}
+                <ChatAssistant scanResult={result} />
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -19,16 +19,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        // The "System Stack" for that native Apple feel
-        sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "San Francisco",
-          "Segoe UI",
-          "Roboto",
-          "Helvetica Neue",
-          "sans-serif",
-        ],
+        // The Swiss Grid Stack
+        sans: ["Inter", "sans-serif"],
+        heading: ["Space Grotesk", "sans-serif"], // New Heading Font
+        mono: ["Space Mono", "monospace"], // New Data Font
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,6 +64,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      borderWidth: {
+        "3": "3px",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -79,27 +76,20 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        // Apple-style smooth spring animations
-        "scale-in": {
-          "0%": { transform: "scale(0.95)", opacity: "0" },
-          "100%": { transform: "scale(1)", opacity: "1" },
+        "slide-in": {
+          "0%": { transform: "translateX(-20px)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
         },
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
-        "slide-up": {
-          "0%": { transform: "translateY(10px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        // Using cubic-bezier for that "fluid" feel
-        "scale-in": "scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        "slide-in": "slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         "fade-in": "fade-in 0.3s ease-out",
-        "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
       },
     },
   },

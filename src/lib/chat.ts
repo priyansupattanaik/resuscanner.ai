@@ -1,31 +1,43 @@
 import { config } from "@/data/config";
+import { ScanResult } from "./atsScanner"; // Import ScanResult type
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
 }
 
+// Updated signature to take the full analysis result
 export async function sendChatMessage(
   history: ChatMessage[],
-  resumeContext: string,
-  jobRole: string,
+  analysisResult: ScanResult,
 ): Promise<string> {
   try {
-    // Removed debugService, using standard console for errors only
-    const systemPrompt = `You are an expert Career Coach and ATS Specialist.
-    User Context: Applying for "${jobRole}".
-    Resume Context: "${resumeContext.slice(0, 4000)}..."
+    const systemPrompt = `You are TAS (Talent Acquisition Specialist).
     
-    Directives:
-    1. Be concise, encouraging, and actionable.
-    2. Do NOT hallucinate skills the user does not have.
-    3. Keep answers under 150 words.`;
+    YOUR KNOWLEDGE BASE:
+    - User's Target Role: "${analysisResult.jobRole}"
+    - Resume Content: "${analysisResult.resumeText.slice(0, 3000)}..."
+    - YOUR PREVIOUS ANALYSIS:
+      - Score Given: ${analysisResult.score}/100
+      - Missing Keywords Identified: ${analysisResult.missingKeywords.join(", ")}
+      - Your Feedback Summary: "${analysisResult.summary}"
+    
+    YOUR RULES:
+    1. OWN YOUR SCORE: If the user asks "Why did I get this score?", explain it using the missing keywords and feedback above. Do not say "I didn't give you a score." YOU gave the score.
+    2. STRICT PERSONA: You are a strict, professional recruiter.
+    3. RELEVANCE CHECK: If the score is low (<40), bluntly tell them their resume is irrelevant for this role.
+    4. DOMAIN ONLY: Answer only Resume/Job questions. Refuse others.
+    
+    Keep responses under 150 words.`;
+
+    // Clean history to remove old system prompts
+    const cleanHistory = history.filter((h) => h.role !== "system");
 
     const payload = {
       model: config.api.model,
-      messages: [{ role: "system", content: systemPrompt }, ...history],
-      temperature: 0.7,
-      max_tokens: 500,
+      messages: [{ role: "system", content: systemPrompt }, ...cleanHistory],
+      temperature: 0.3,
+      max_tokens: 400,
     };
 
     const response = await fetch(config.api.endpoint, {
@@ -46,13 +58,11 @@ export async function sendChatMessage(
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
-    if (!content) {
-      throw new Error("Empty response");
-    }
+    if (!content) throw new Error("Empty response");
 
     return content;
   } catch (error) {
     console.error("Chat Failed", error);
-    return "I'm having trouble connecting to the AI right now. Please try again.";
+    return "TAS System Alert: Connection interruption. Please try again.";
   }
 }

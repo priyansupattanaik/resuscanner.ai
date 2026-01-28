@@ -5,9 +5,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   PlusCircle,
   History,
-  ChevronRight,
   LayoutDashboard,
   Trash2,
+  ChevronRight,
+  ArchiveX,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -18,18 +19,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Props to allow the parent to close the mobile sheet when an item is clicked
 interface NavContentProps {
   onNavigate?: () => void;
 }
 
 const NavContent = ({ onNavigate }: NavContentProps) => {
-  const { history, loadScanFromHistory, deleteScan, resetScan, result } =
-    useScan();
+  const {
+    history,
+    loadScanFromHistory,
+    deleteScan,
+    clearHistory,
+    resetScan,
+    result,
+  } = useScan();
 
   const handleDelete = (e: React.MouseEvent, date: string) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this scan?")) {
+    if (confirm("Delete this record?")) {
       deleteScan(date);
     }
   };
@@ -45,117 +51,123 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
+    <div className="flex flex-col h-full bg-background font-sans">
       {/* Header */}
-      <div className="p-6 border-b border-slate-100 flex-shrink-0">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <LayoutDashboard className="w-5 h-5 text-white" />
+      <div className="p-6 border-b-2 border-black flex-shrink-0 bg-white">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-black flex items-center justify-center neo-shadow">
+            <LayoutDashboard className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-lg text-slate-900 tracking-tight">
+          <span className="font-heading font-bold text-xl text-black tracking-tight uppercase">
             ResuScanner
           </span>
         </div>
 
         <Button
           onClick={handleNewScan}
-          className="w-full justify-start gap-2 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-indigo-600 shadow-sm"
-          variant="outline"
+          className="w-full justify-between h-10 bg-white text-black border-2 border-black neo-shadow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all duration-200 active:bg-slate-100"
         >
-          <PlusCircle className="w-4 h-4" />
-          New Scan
+          <span className="font-bold flex items-center gap-2 text-sm uppercase">
+            <PlusCircle className="w-4 h-4" />
+            New Scan
+          </span>
+          <ChevronRight className="w-3 h-3" />
         </Button>
       </div>
 
       {/* History List */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        <div className="px-6 py-4 flex-shrink-0">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0 bg-[#f8f8f8]">
+        <div className="px-6 py-4 flex-shrink-0 flex items-center justify-between border-b border-slate-200">
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <History className="w-3 h-3" />
-            Recent Scans
+            History
           </h3>
+          {history.length > 0 && (
+            <button
+              onClick={clearHistory}
+              className="text-[10px] font-bold text-slate-400 hover:text-red-600 uppercase transition-colors flex items-center gap-1"
+            >
+              <ArchiveX className="w-3 h-3" /> Clear All
+            </button>
+          )}
         </div>
 
-        <ScrollArea className="flex-1 px-4">
-          <div className="space-y-2 pb-6">
+        <ScrollArea className="flex-1 px-4 py-4">
+          <div className="space-y-3 pb-6">
             {history.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">
-                No history yet
-              </p>
+              <div className="text-center py-10 opacity-50">
+                <p className="text-sm font-medium text-slate-400">
+                  Empty History
+                </p>
+              </div>
             ) : (
-              history.map((scan, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => handleSelectHistory(scan)}
-                  className={cn(
-                    "relative p-3 rounded-lg cursor-pointer transition-all border group pr-9",
-                    result?.date === scan.date
-                      ? "bg-indigo-50 border-indigo-200 shadow-sm"
-                      : "bg-white border-transparent hover:border-slate-200 hover:shadow-sm"
-                  )}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <span
-                      className={cn(
-                        "font-medium text-sm truncate max-w-[140px]",
-                        result?.date === scan.date
-                          ? "text-indigo-700"
-                          : "text-slate-700"
-                      )}
-                    >
-                      {scan.jobRole}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-xs font-bold px-1.5 py-0.5 rounded",
-                        scan.score >= 80
-                          ? "bg-emerald-100 text-emerald-700"
-                          : scan.score >= 60
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-rose-100 text-rose-700"
-                      )}
-                    >
-                      {scan.score}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-slate-400">
-                      {scan.date ? format(new Date(scan.date), "MMM d") : "N/A"}
-                    </span>
-                    {result?.date === scan.date && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              history.map((scan, idx) => {
+                const isSelected = result?.date === scan.date;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => handleSelectHistory(scan)}
+                    className={cn(
+                      "relative p-3 border-2 cursor-pointer transition-all duration-200 group",
+                      isSelected
+                        ? "bg-black text-white border-black neo-shadow-sm"
+                        : "bg-white text-slate-700 border-slate-200 hover:border-black hover:neo-shadow-sm",
                     )}
-                  </div>
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-bold text-xs uppercase truncate max-w-[140px]">
+                        {scan.jobRole}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-[10px] font-mono font-bold px-1.5 py-0.5 border",
+                          scan.score >= 80
+                            ? "bg-emerald-400 text-black border-black"
+                            : scan.score >= 60
+                              ? "bg-amber-400 text-black border-black"
+                              : "bg-rose-400 text-black border-black",
+                        )}
+                      >
+                        {scan.score}
+                      </span>
+                    </div>
 
-                  {/* Delete Button */}
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={(e) => handleDelete(e, scan.date)}
-                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete scan</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex justify-between items-center">
+                      <span
+                        className={cn(
+                          "text-[10px] font-mono uppercase",
+                          isSelected ? "text-slate-400" : "text-slate-500",
+                        )}
+                      >
+                        {scan.date
+                          ? format(new Date(scan.date), "dd MMM")
+                          : "-"}
+                      </span>
+
+                      <button
+                        onClick={(e) => handleDelete(e, scan.date)}
+                        className={cn(
+                          "opacity-0 group-hover:opacity-100 transition-opacity p-1",
+                          isSelected
+                            ? "text-white hover:text-red-400"
+                            : "text-slate-400 hover:text-red-600",
+                        )}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </ScrollArea>
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-200 flex-shrink-0">
-        <div className="text-[10px] text-slate-400 text-center">
-          v1.1.2 • Mobile Ready
+      <div className="p-4 border-t-2 border-black bg-white flex-shrink-0">
+        <div className="text-[10px] font-mono font-bold text-slate-400 uppercase text-center">
+          Scanner v2.1
         </div>
       </div>
     </div>

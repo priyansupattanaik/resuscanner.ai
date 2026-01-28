@@ -1,42 +1,37 @@
+/* src/App.css */
+
+/* Remove default Vite centering and constraints */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left; /* FORCE LEFT ALIGNMENT */
+  width: 100%;
+  min-height: 100vh;
+  isolation: isolate;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Ensure smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Optional: Custom scrollbar to match the "technical" vibe */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-left: 2px solid #000;
 }
 
-.card {
-  padding: 2em;
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 2px solid #f1f1f1;
 }
 
-.read-the-docs {
-  color: #888;
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
 }

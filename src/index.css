@@ -4,9 +4,9 @@
 
 @layer base {
   :root {
-    /* Pure, clean Apple-like defaults */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Swiss Grid / Neo-Brutalist Palette */
+    --background: 40 20% 98%; /* Off-white #FDFBF7 */
+    --foreground: 240 10% 3.9%; /* Near Black */
 
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -14,26 +14,28 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 211 100% 50%; /* System Blue */
+    /* Bold Primary - International Orange */
+    --primary: 16 100% 50%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    /* Bold Secondary - Azure Blue */
+    --secondary: 221 83% 53%;
+    --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 240 4.8% 95.9%;
+    --accent: 40 20% 94%;
     --accent-foreground: 240 5.9% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 211 100% 50%;
+    --border: 0 0% 0%; /* Pitch Black Borders */
+    --input: 0 0% 0%;
+    --ring: 16 100% 50%;
 
-    --radius: 1rem;
+    --radius: 0px; /* No rounded corners by default */
   }
 }
 
@@ -42,48 +44,25 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-blue-100 selection:text-blue-900;
-    /* Optimizes font rendering for that crisp look */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 }
 
-/* Glassmorphism Utilities 
-  High saturation blur for that "frosted glass" effect 
-*/
-.glass-panel {
-  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-sm;
-}
+@layer utilities {
+  /* The signature hard shadow */
+  .neo-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  }
+  .neo-shadow-sm {
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+  }
+  .neo-shadow-lg {
+    box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  }
 
-.glass-card {
-  @apply bg-white/60 backdrop-blur-2xl border border-white/40 shadow-lg rounded-[24px] transition-all duration-300 hover:shadow-xl hover:bg-white/80;
-}
-
-/* Refined Mesh Gradient
-  Much softer, using lighter blues and grays for a "Pro" look
-*/
-.mesh-gradient-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  background: radial-gradient(
-      at 0% 0%,
-      hsla(210, 100%, 98%, 1) 0,
-      transparent 50%
-    ),
-    radial-gradient(at 100% 0%, hsla(220, 100%, 97%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(200, 100%, 98%, 1) 0, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(215, 100%, 99%, 1) 0, transparent 50%);
-  filter: blur(100px);
-  opacity: 1;
-}
-
-/* Hide scrollbar for clean aesthetics */
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
+  /* Interactive press effect */
+  .neo-press {
+    @apply transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+  }
 }

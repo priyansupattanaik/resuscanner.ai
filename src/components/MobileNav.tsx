@@ -13,15 +13,14 @@ const MobileNav = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden text-slate-600"
+          className="md:hidden text-black hover:bg-accent border-2 border-transparent hover:border-black transition-all"
         >
           <Menu className="w-6 h-6" />
         </Button>
       </SheetTrigger>
-      {/* Side="left" makes it slide from the left */}
       <SheetContent
         side="left"
-        className="p-0 w-80 bg-slate-50 border-r-slate-200"
+        className="p-0 w-80 bg-background border-r-2 border-black"
       >
         <NavContent onNavigate={() => setOpen(false)} />
       </SheetContent>

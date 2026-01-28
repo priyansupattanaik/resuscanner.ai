@@ -1,5 +1,11 @@
 import React from "react";
-import { ArrowRight, Sparkles, Briefcase, FileText } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Briefcase,
+  FileText,
+  ChevronDown,
+} from "lucide-react";
 import { config } from "@/data/config";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,38 +42,42 @@ const JobForm: React.FC<JobFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Role Input */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Briefcase className="w-3.5 h-3.5" />
-            Target Role <span className="text-rose-500">*</span>
+          <label className="text-xs font-bold text-black uppercase tracking-widest flex items-center gap-2">
+            Target Role{" "}
+            <span className="text-primary text-lg leading-none">*</span>
           </label>
-          <input
-            type="text"
-            value={jobRole}
-            onChange={(e) => setJobRole(e.target.value)}
-            placeholder="e.g. Senior Product Designer"
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm"
-            disabled={isLoading}
-          />
+          <div className="relative group">
+            <input
+              type="text"
+              value={jobRole}
+              onChange={(e) => setJobRole(e.target.value)}
+              placeholder="E.G. SENIOR DESIGNER"
+              className="w-full h-12 border-2 border-slate-300 bg-white px-4 text-sm font-medium text-black placeholder:text-slate-400 focus:border-black focus:outline-none focus:ring-0 transition-all rounded-none group-hover:border-slate-400"
+              disabled={isLoading}
+            />
+            <Briefcase className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          </div>
         </div>
 
         {/* Level Select */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Experience Level <span className="text-rose-500">*</span>
+          <label className="text-xs font-bold text-black uppercase tracking-widest flex items-center gap-2">
+            Experience Level{" "}
+            <span className="text-primary text-lg leading-none">*</span>
           </label>
           <div className="relative">
             <select
               value={jobLevel}
               onChange={(e) => setJobLevel(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm cursor-pointer"
+              className="w-full h-12 appearance-none border-2 border-slate-300 bg-white px-4 text-sm font-medium text-black focus:border-black focus:outline-none focus:ring-0 transition-all cursor-pointer rounded-none hover:border-slate-400"
               disabled={isLoading}
             >
               <option value="" disabled>
-                Select Level
+                SELECT LEVEL
               </option>
               {config.ui.jobLevels.map((level) => (
                 <option key={level.id} value={level.label}>
@@ -75,38 +85,26 @@ const JobForm: React.FC<JobFormProps> = ({
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <svg
-                width="10"
-                height="6"
-                viewBox="0 0 10 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M1 1L5 5L9 1" />
-              </svg>
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
+              <ChevronDown className="w-4 h-4" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Job Description Input (New) */}
+      {/* Job Description Input */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5" />
-          Job Description{" "}
-          <span className="text-slate-400 font-normal lowercase">
-            (optional but recommended)
+        <label className="text-xs font-bold text-black uppercase tracking-widest flex items-center gap-2">
+          Job Description
+          <span className="text-xs font-normal text-slate-500 normal-case bg-slate-100 px-2 py-0.5">
+            Recommended
           </span>
         </label>
         <Textarea
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          placeholder="Paste the full job description here for a much more accurate analysis..."
-          className="min-h-[120px] rounded-xl border-slate-200 bg-white text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 resize-none shadow-sm"
+          placeholder="Paste the full job description here..."
+          className="min-h-[120px] rounded-none border-2 border-slate-300 bg-white text-sm font-medium focus:border-black focus:ring-0 resize-none hover:border-slate-400"
           disabled={isLoading}
         />
       </div>
@@ -116,24 +114,21 @@ const JobForm: React.FC<JobFormProps> = ({
         type="submit"
         disabled={!isFormValid || isLoading}
         className={cn(
-          "w-full h-12 rounded-xl text-base font-medium shadow-lg transition-all duration-300 mt-2",
-          "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
-          !isLoading &&
-            isFormValid &&
-            "hover:shadow-indigo-500/25 hover:-translate-y-0.5"
+          "w-full h-14 rounded-none text-base font-bold uppercase tracking-wide border-2 border-black transition-all duration-150 mt-4",
+          "bg-black text-white hover:bg-white hover:text-black neo-shadow",
+          "hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:bg-slate-300 disabled:border-slate-300",
         )}
       >
         {isLoading ? (
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            <span>Analyzing Profile...</span>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-white" />
+            <span>PROCESSING DATA...</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            <span>Start Analysis</span>
-            <ArrowRight className="w-4 h-4 opacity-60" />
+          <div className="flex items-center gap-3">
+            <span>START ANALYSIS</span>
+            <ArrowRight className="w-5 h-5" />
           </div>
         )}
       </Button>

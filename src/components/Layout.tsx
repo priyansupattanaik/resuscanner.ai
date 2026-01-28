@@ -12,21 +12,21 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen flex bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen flex font-sans text-slate-900 selection:bg-primary selection:text-white">
       <Background />
 
-      {/* Desktop Sidebar (Hidden on Mobile) */}
+      {/* Desktop Sidebar */}
       <Sidebar />
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
-        {/* Mobile Header (Visible only on Mobile) */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-background border-b-2 border-black sticky top-0 z-50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary border-2 border-black flex items-center justify-center neo-shadow-sm">
               <LayoutDashboard className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-slate-900 tracking-tight">
+            <span className="font-bold text-lg text-black tracking-tighter uppercase">
               ResuScanner
             </span>
           </div>

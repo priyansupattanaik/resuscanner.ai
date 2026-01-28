@@ -12,18 +12,19 @@ interface ScanContextType {
   file: File | null;
   jobRole: string;
   jobLevel: string;
-  jobDescription: string; // [New]
+  jobDescription: string;
   isLoading: boolean;
   result: ScanResult | null;
   history: ScanResult[];
   setFile: (file: File | null) => void;
   setJobRole: (role: string) => void;
   setJobLevel: (level: string) => void;
-  setJobDescription: (desc: string) => void; // [New]
+  setJobDescription: (desc: string) => void;
   setResult: (result: ScanResult | null) => void;
   performScan: () => Promise<void>;
   loadScanFromHistory: (scan: ScanResult) => void;
   deleteScan: (dateKey: string) => void;
+  clearHistory: () => void; // [New]
   resetScan: () => void;
 }
 
@@ -33,7 +34,7 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
   const [file, setFile] = useState<File | null>(null);
   const [jobRole, setJobRole] = useState("");
   const [jobLevel, setJobLevel] = useState("");
-  const [jobDescription, setJobDescription] = useState(""); // [New]
+  const [jobDescription, setJobDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanResult[]>([]);
@@ -50,7 +51,6 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const performScan = async () => {
-    // We allow JD to be empty, but Role/Level/File are strictly required
     if (!file || !jobRole || !jobLevel) {
       toast.error("Please fill in the required fields (File, Role, Level)");
       return;
@@ -58,12 +58,11 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setIsLoading(true);
-      // Pass the new jobDescription to the scanner
       const scanResult = await scanResume(
         file,
         jobRole,
         jobLevel,
-        jobDescription
+        jobDescription,
       );
 
       setResult(scanResult);
@@ -85,8 +84,7 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
     setResult(scan);
     setJobRole(scan.jobRole);
     setJobLevel(scan.jobLevel);
-    // If the historical scan saved the JD, we could restore it here.
-    // For now, we leave it empty or restore if you choose to add it to ScanResult interface.
+    setJobDescription(""); // Reset optional JD as it's not stored in simplified history yet
   };
 
   const deleteScan = (dateKey: string) => {
@@ -97,7 +95,19 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
     if (result && result.date === dateKey) {
       resetScan();
     }
-    toast.success("Scan deleted from history");
+    toast.success("Item deleted");
+  };
+
+  const clearHistory = () => {
+    if (
+      confirm(
+        "Are you sure you want to clear all history? This cannot be undone.",
+      )
+    ) {
+      setHistory([]);
+      localStorage.removeItem("resuscanner_history");
+      toast.success("History cleared");
+    }
   };
 
   const resetScan = () => {
@@ -126,6 +136,7 @@ export const ScanProvider = ({ children }: { children: ReactNode }) => {
         performScan,
         loadScanFromHistory,
         deleteScan,
+        clearHistory,
         resetScan,
       }}
     >

@@ -1,27 +1,34 @@
-
-import React from 'react';
-import Layout from '@/components/Layout';
-import { AlertCircle } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
+import Background from "@/components/Background";
 
 const NotFound = () => {
   return (
-    <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="h-24 w-24 rounded-full bg-destructive/20 flex items-center justify-center mb-6 animate-pulse-glow">
-          <AlertCircle className="h-12 w-12 text-destructive" />
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 font-sans text-center relative overflow-hidden">
+      <Background />
+
+      <div className="bg-white border-2 border-black p-12 neo-shadow max-w-lg w-full relative z-10 flex flex-col items-center">
+        <div className="w-16 h-16 bg-primary border-2 border-black flex items-center justify-center mb-6 neo-shadow">
+          <AlertTriangle className="w-8 h-8 text-white" />
         </div>
-        
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-muted-foreground mb-8">Oops! Page not found</p>
-        
-        <a 
-          href="/" 
-          className="px-6 py-3 bg-blue-purple-gradient rounded-lg hover:opacity-90 transition-opacity"
+
+        <h1 className="font-heading text-6xl font-bold text-black mb-2">404</h1>
+        <div className="h-1 w-20 bg-black mb-6" />
+
+        <p className="font-mono text-lg text-slate-600 mb-8 uppercase tracking-wide">
+          Page_Not_Found
+        </p>
+
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-8 py-3 bg-black text-white font-mono font-bold text-sm uppercase tracking-wider border-2 border-black hover:bg-white hover:text-black transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none neo-shadow"
         >
-          Return Home
-        </a>
+          <ArrowLeft className="w-4 h-4" />
+          Return to Base
+        </Link>
       </div>
-    </Layout>
+    </div>
   );
 };
 

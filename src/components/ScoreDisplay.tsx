@@ -1,20 +1,14 @@
 import React from "react";
 import { ScanResult } from "@/lib/atsScanner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2,
-  AlertCircle,
+  AlertTriangle,
   XCircle,
-  TrendingUp,
-  Sparkles,
+  Hash,
+  FileText,
+  ListChecks,
 } from "lucide-react";
-import {
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-  ResponsiveContainer,
-} from "recharts";
+import { cn } from "@/lib/utils";
 
 interface ScoreDisplayProps {
   result: ScanResult;
@@ -23,153 +17,135 @@ interface ScoreDisplayProps {
 const ScoreDisplay = ({ result }: ScoreDisplayProps) => {
   const { score, missingKeywords, summary, jobRole } = result;
 
-  const data = [
-    {
-      name: "Score",
-      value: score,
-      fill: score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#f43f5e",
-    },
-  ];
+  const getStatus = (s: number) => {
+    if (s >= 80)
+      return {
+        color: "bg-emerald-500",
+        text: "Strong Match",
+        textCol: "text-emerald-700",
+      };
+    if (s >= 60)
+      return {
+        color: "bg-amber-400",
+        text: "Good Match",
+        textCol: "text-amber-700",
+      };
+    return {
+      color: "bg-rose-500",
+      text: "Low Match",
+      textCol: "text-rose-700",
+    };
+  };
+
+  const status = getStatus(score);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header Summary: Flex-Col on Mobile, Row on Desktop */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Score Card */}
-        <Card className="w-full lg:w-80 shadow-sm border-slate-200 overflow-hidden relative flex-shrink-0">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
-          <CardContent className="pt-8 flex flex-col items-center justify-center">
-            {/* Responsive Chart Container */}
-            <div className="h-48 w-48 relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart
-                  innerRadius="80%"
-                  outerRadius="100%"
-                  barSize={10}
-                  data={data}
-                  startAngle={90}
-                  endAngle={-270}
-                >
-                  <PolarAngleAxis
-                    type="number"
-                    domain={[0, 100]}
-                    angleAxisId={0}
-                    tick={false}
-                  />
-                  <RadialBar background dataKey="value" cornerRadius={30} />
-                </RadialBarChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl font-bold tracking-tighter text-slate-900">
+    <div className="space-y-6 h-full overflow-y-auto pr-1">
+      {/* Top Row: Score & Summary */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Score Block */}
+        <div className="bg-white border-2 border-black p-6 neo-shadow relative overflow-hidden group hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all duration-300">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500 mb-1">
+                Match Score
+              </h3>
+              <div className="flex items-baseline gap-1">
+                <span className="text-6xl font-heading font-bold tracking-tighter text-black">
                   {score}
                 </span>
-                <span className="text-xs uppercase font-bold text-slate-400 mt-1">
-                  ATS Score
-                </span>
+                <span className="text-lg font-bold text-slate-400">/100</span>
               </div>
             </div>
-
-            <div className="mt-4 text-center">
-              <h3 className="font-semibold text-slate-900">
-                {score >= 80
-                  ? "Match Found"
-                  : score >= 60
-                  ? "Potential Match"
-                  : "Low Match"}
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                vs. {jobRole} requirements
-              </p>
+            <div
+              className={cn(
+                "px-3 py-1 text-xs font-bold uppercase border-2 border-black",
+                status.color,
+                "text-white",
+              )}
+            >
+              {status.text}
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Executive Summary */}
-        <Card className="flex-1 shadow-sm border-slate-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2 text-slate-800">
-              <Sparkles className="w-4 h-4 text-purple-500" />
-              AI Executive Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 leading-relaxed text-sm">
-              {summary}
-            </div>
+          <div className="mt-4 w-full h-3 border-2 border-black p-0.5 bg-slate-50">
+            <div
+              className={cn(
+                "h-full transition-all duration-1000 ease-out",
+                status.color,
+              )}
+              style={{ width: `${score}%` }}
+            />
+          </div>
+        </div>
 
-            {/* Stats Grid: 1 col on mobile, 3 cols on tablet/desktop */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white">
-                <div className="p-2 bg-emerald-100 text-emerald-600 rounded-full shrink-0">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">
-                    Format
-                  </p>
-                  <p className="text-sm font-semibold">Standard</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white">
-                <div className="p-2 bg-blue-100 text-blue-600 rounded-full shrink-0">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">
-                    Parsing
-                  </p>
-                  <p className="text-sm font-semibold">Success</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-white">
-                <div className="p-2 bg-rose-100 text-rose-600 rounded-full shrink-0">
-                  <AlertCircle className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">
-                    Keywords
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {missingKeywords.length} Missing
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Summary Block */}
+        <div className="bg-white border-2 border-black p-6 neo-shadow hover:neo-shadow-lg transition-all duration-300">
+          <div className="flex items-center gap-2 mb-3 border-b border-slate-100 pb-2">
+            <FileText className="w-4 h-4 text-primary" />
+            <h3 className="font-heading font-bold text-lg uppercase">
+              Executive Summary
+            </h3>
+          </div>
+          <div className="font-sans text-sm leading-relaxed text-slate-700">
+            {summary}
+          </div>
 
-      {/* Keyword Analysis */}
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader>
-          <CardTitle className="text-base text-slate-800">
-            Critical Missing Keywords
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {missingKeywords.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {missingKeywords.map((keyword, i) => (
-                <Badge
-                  key={i}
-                  variant="secondary"
-                  className="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 border-rose-100 gap-1.5 text-sm"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  {keyword}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 p-4 rounded-lg">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-medium">
-                Great job! No critical keywords missing.
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <span className="text-xs font-bold uppercase text-slate-500">
+                Format: Standard
               </span>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="flex items-center gap-2">
+              <ListChecks className="w-4 h-4 text-blue-500" />
+              <span className="text-xs font-bold uppercase text-slate-500">
+                Parsing: Success
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Missing Keywords Section */}
+      <div className="bg-white border-2 border-black p-6 neo-shadow">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-500" />
+            <h3 className="font-heading font-bold text-lg uppercase">
+              Missing Keywords
+            </h3>
+          </div>
+          <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-sm">
+            {missingKeywords.length} Found
+          </span>
+        </div>
+
+        {missingKeywords.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {missingKeywords.map((keyword, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span className="font-mono text-xs font-bold uppercase">
+                  {keyword}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="text-sm font-medium">
+              All critical keywords present. Excellent work!
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
