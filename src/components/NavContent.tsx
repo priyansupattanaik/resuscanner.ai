@@ -2,6 +2,7 @@ import React from "react";
 import { useScan } from "@/context/ScanContext";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate, useLocation } from "react-router-dom"; // Added for navigation
 import {
   PlusCircle,
   History,
@@ -9,6 +10,7 @@ import {
   Trash2,
   ChevronRight,
   ArchiveX,
+  Sparkles, // Added icon for Humanizer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -24,6 +26,8 @@ interface NavContentProps {
 }
 
 const NavContent = ({ onNavigate }: NavContentProps) => {
+  const navigate = useNavigate(); // Hook for navigation
+  const location = useLocation(); // Hook to check active route
   const {
     history,
     loadScanFromHistory,
@@ -42,11 +46,18 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
 
   const handleNewScan = () => {
     resetScan();
+    navigate("/");
+    onNavigate?.();
+  };
+  
+  const handleHumanizer = () => {
+    navigate("/humanizer");
     onNavigate?.();
   };
 
   const handleSelectHistory = (scan: any) => {
     loadScanFromHistory(scan);
+    navigate("/");
     onNavigate?.();
   };
 
@@ -63,16 +74,35 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
           </span>
         </div>
 
-        <Button
-          onClick={handleNewScan}
-          className="w-full justify-between h-10 bg-white text-black border-2 border-black neo-shadow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all duration-200 active:bg-slate-100"
-        >
-          <span className="font-bold flex items-center gap-2 text-sm uppercase">
-            <PlusCircle className="w-4 h-4" />
-            New Scan
-          </span>
-          <ChevronRight className="w-3 h-3" />
-        </Button>
+        <div className="space-y-3">
+          <Button
+            onClick={handleNewScan}
+            className={cn(
+              "w-full justify-between h-10 bg-white text-black border-2 border-black neo-shadow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all duration-200 active:bg-slate-100",
+              location.pathname === "/" && "bg-slate-100 shadow-none translate-x-[1px] translate-y-[1px]"
+            )}
+          >
+            <span className="font-bold flex items-center gap-2 text-sm uppercase">
+              <PlusCircle className="w-4 h-4" />
+              New Scan
+            </span>
+            <ChevronRight className="w-3 h-3" />
+          </Button>
+
+          <Button
+            onClick={handleHumanizer}
+            className={cn(
+              "w-full justify-between h-10 bg-white text-black border-2 border-black neo-shadow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all duration-200 active:bg-slate-100",
+              location.pathname === "/humanizer" && "bg-slate-100 shadow-none translate-x-[1px] translate-y-[1px]"
+            )}
+          >
+            <span className="font-bold flex items-center gap-2 text-sm uppercase">
+              <Sparkles className="w-4 h-4" />
+              Humanizer
+            </span>
+            <ChevronRight className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
 
       {/* History List */}
@@ -102,7 +132,7 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
               </div>
             ) : (
               history.map((scan, idx) => {
-                const isSelected = result?.date === scan.date;
+                const isSelected = result?.date === scan.date && location.pathname === "/";
                 return (
                   <div
                     key={idx}
