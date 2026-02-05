@@ -1,10 +1,6 @@
 // src/data/config.ts
-// DEBUG: Check if key is loaded (Prints to Console)
-const rawKey = import.meta.env.VITE_GROQ_API_KEY;
-console.log(
-  "System Status:",
-  rawKey ? "Key Loaded" : "Key Missing (Check .env for VITE_GROQ_API_KEY)",
-);
+// Config loaded
+
 
 export const config = {
   app: {
@@ -13,9 +9,9 @@ export const config = {
     version: "1.0.0",
   },
   api: {
-    apiKey: rawKey || "",
-    // Updated: Groq API Endpoint
-    endpoint: "https://api.groq.com/openai/v1/chat/completions",
+    apiKey: "", // Key is now secured backend-side
+    // Updated: Proxy through Netlify Function
+    endpoint: "/.netlify/functions/analyze",
 
     // Updated: Using Llama 3.3 70B Versatile (Supported by Groq)
     model: "llama-3.3-70b-versatile",

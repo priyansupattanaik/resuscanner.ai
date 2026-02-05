@@ -1,11 +1,7 @@
 import { pdfjs } from "react-pdf";
 
-// Use standard Vite URL constructor for the worker to ensure it bundles correctly
-// rather than relying on an external CDN.
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url
-).toString();
+// Use unpkg CDN for the worker to avoid Vite dev server issues with local path resolution
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 /**
  * Extract text from a PDF file
@@ -18,12 +14,57 @@ export async function extractTextFromPdf(file: File): Promise<string> {
     let fullText = "";
 
     // Extract text from each page
+    // Extract text from each page with layout preservation
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item) => ("str" in item ? item.str : ""))
-        .join(" ");
+      
+      // Cast items to a type with transform/width for easier access
+      const items: any[] = textContent.items.filter((item: any) => "str" in item && "transform" in item);
+
+      // Sort items by Y (descending) then X (ascending)
+      // PDF coordinates: (0,0) is bottom-left. Higher Y = higher on page.
+      items.sort((a, b) => {
+        const yDiff = b.transform[5] - a.transform[5];
+        // Tolerance for same line
+        if (Math.abs(yDiff) > 5) {
+          return yDiff; // distinct lines, top to bottom
+        }
+        return a.transform[4] - b.transform[4]; // same line, left to right
+      });
+
+      let pageText = "";
+      let lastY = -1;
+      let lastX = -1;
+
+      for (const item of items) {
+        const x = item.transform[4];
+        const y = item.transform[5];
+        const text = item.str;
+
+        // Initialize lastY on first item
+        if (lastY === -1) {
+          lastY = y;
+          lastX = x + item.width;
+          pageText += text;
+          continue;
+        }
+
+        // Check for new line (significant Y difference)
+        if (Math.abs(y - lastY) > 8) {
+          pageText += "\n";
+          lastX = -1; // reset X tracking for new line
+        } 
+        // Check for space on same line (significant X gap)
+        else if (x - lastX > 10) {
+          pageText += " ";
+        }
+
+        pageText += text;
+        
+        lastY = y;
+        lastX = x + (item.width || 0);
+      }
 
       fullText += pageText + "\n";
     }

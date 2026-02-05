@@ -65,7 +65,7 @@ export async function generateResumeAnalysis(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${config.api.apiKey}`,
+        // Authorization header removed: handled by Netlify Function proxy
       },
       body: JSON.stringify({
         model: config.api.model,

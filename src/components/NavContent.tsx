@@ -12,6 +12,7 @@ import {
   ArchiveX,
   Sparkles, // Added icon for Humanizer
 } from "lucide-react";
+import { ScanResult } from "@/lib/atsScanner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
@@ -55,7 +56,7 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
     onNavigate?.();
   };
 
-  const handleSelectHistory = (scan: any) => {
+  const handleSelectHistory = (scan: ScanResult) => {
     loadScanFromHistory(scan);
     navigate("/");
     onNavigate?.();
@@ -66,8 +67,19 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
       {/* Header */}
       <div className="p-6 border-b-2 border-black flex-shrink-0 bg-white">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-black flex items-center justify-center neo-shadow">
-            <LayoutDashboard className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-black flex items-center justify-center neo-shadow overflow-hidden">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-full h-full object-contain" 
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.remove('bg-black');
+                e.currentTarget.parentElement?.classList.add('bg-black'); // keep bg
+                // Fallback to text or icon? 
+                // For now, let's just make it an image. The user can see if it's broken.
+              }}
+            />
           </div>
           <span className="font-heading font-bold text-xl text-black tracking-tight uppercase">
             ResuScanner
@@ -197,7 +209,7 @@ const NavContent = ({ onNavigate }: NavContentProps) => {
       {/* Footer */}
       <div className="p-4 border-t-2 border-black bg-white flex-shrink-0">
         <div className="text-[10px] font-mono font-bold text-slate-400 uppercase text-center">
-          Scanner v2.1
+          ReSu Scanner © 2026
         </div>
       </div>
     </div>
