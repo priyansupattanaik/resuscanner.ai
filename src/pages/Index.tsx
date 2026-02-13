@@ -7,6 +7,7 @@ import ChatAssistant from "@/components/ChatAssistant";
 import ResumeForge from "@/components/ResumeForge"; // Import Forge
 import { useScan } from "@/context/ScanContext";
 import { Loader2, Hammer } from "lucide-react";
+import Loader from "@/components/ui/Loader";
 import { cn } from "@/lib/utils";
 
 const Index = () => {
@@ -90,8 +91,8 @@ const Index = () => {
         {/* LOADING MODE */}
         {isLoading && (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
-            <div className="max-w-md w-full border-2 border-black bg-white p-8 neo-shadow text-center space-y-6">
-              <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
+            <div className="max-w-md w-full border-2 border-black bg-white p-8 neo-shadow text-center space-y-6 flex flex-col items-center">
+              <Loader />
               <div>
                 <h2 className="font-heading text-2xl font-bold uppercase mb-2">
                   Analyzing...
